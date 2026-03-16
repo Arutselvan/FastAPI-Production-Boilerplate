@@ -2,10 +2,12 @@ from typing import Callable
 
 from fastapi import APIRouter, Depends, Request
 
-from app.controllers import ProjectController, TeamController
+from app.controllers import MilestoneController, ProjectController, TeamController
+from app.models.milestone import MilestonePermission
 from app.models.project import ProjectPermission
 from app.models.team import TeamPermission
 from app.schemas.requests.teams import TeamCreate
+from app.schemas.responses.milestones import MilestoneResponse
 from app.schemas.responses.projects import ProjectResponse
 from app.schemas.responses.teams import TeamResponse
 from core.factory import Factory
@@ -64,6 +66,20 @@ async def get_team_projects(
 
     assert_access(projects)
     return projects
+
+
+@team_router.get("/{team_uuid}/milestones", response_model=list[MilestoneResponse])
+async def get_team_milestones(
+    team_uuid: str,
+    team_controller: TeamController = Depends(Factory().get_team_controller),
+    milestone_controller: MilestoneController = Depends(Factory().get_milestone_controller),
+    assert_access: Callable = Depends(Permissions(MilestonePermission.READ)),
+) -> list[MilestoneResponse]:
+    team = await team_controller.get_by_uuid(team_uuid)
+    milestones = await milestone_controller.get_by_team_id(team.id)
+
+    assert_access(milestones)
+    return milestones
 
 
 @team_router.delete("/{team_uuid}", status_code=204)

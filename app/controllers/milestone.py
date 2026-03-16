@@ -15,6 +15,10 @@ class MilestoneController(BaseController[Milestone]):
         """Returns a list of milestones based on project_id."""
         return await self.milestone_repository.get_by_project_id(project_id)
 
+    async def get_by_team_id(self, team_id: int) -> list[Milestone]:
+        """Returns a list of milestones for all projects belonging to a team."""
+        return await self.milestone_repository.get_by_team_id(team_id)
+
     @Transactional(propagation=Propagation.REQUIRED)
     async def add(self, title: str, due_date, project_id: int) -> Milestone:
         """Adds a milestone."""
