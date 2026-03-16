@@ -2,7 +2,7 @@ from functools import partial
 
 from fastapi import Depends
 
-from app.controllers import ActivityLogController, ApprovalController, AttachmentController, AuthController, CategoryController, CommentController, MilestoneController, ProjectController, TagController, TaskController, TeamController, UserController, UserRoleController
+from app.controllers import ActivityLogController, ApprovalController, AttachmentController, AuthController, CategoryController, CommentController, ExportController, MilestoneController, ProjectController, TagController, TaskController, TeamController, UserController, UserRoleController
 from app.models import Approval, Attachment, Category, Comment, Milestone, Project, Tag, Task, Team, User
 from app.models.activity_log import ActivityLog
 from app.models.user_role import UserRole
@@ -96,6 +96,15 @@ class Factory:
     def get_user_role_controller(self, db_session=Depends(get_session)):
         return UserRoleController(
             user_role_repository=self.user_role_repository(db_session=db_session)
+        )
+
+    def get_export_controller(self, db_session=Depends(get_session)):
+        return ExportController(
+            project_repository=self.project_repository(db_session=db_session),
+            milestone_repository=self.milestone_repository(db_session=db_session),
+            comment_repository=self.comment_repository(db_session=db_session),
+            tag_repository=self.tag_repository(db_session=db_session),
+            team_repository=self.team_repository(db_session=db_session),
         )
 
     def get_auth_controller(self, db_session=Depends(get_session)):

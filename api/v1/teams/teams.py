@@ -1,8 +1,9 @@
 from typing import Callable
 
 from fastapi import APIRouter, Depends, Query, Request
+from fastapi.responses import Response
 
-from app.controllers import MilestoneController, ProjectController, TeamController
+from app.controllers import ExportController, MilestoneController, ProjectController, TeamController
 from app.models.milestone import MilestonePermission
 from app.models.project import ProjectPermission
 from app.models.team import TeamPermission
@@ -102,6 +103,19 @@ async def archive_team_projects(
     project_controller: ProjectController = Depends(Factory().get_project_controller),
 ) -> dict:
     return await project_controller.bulk_archive_team_projects(team_uuid, actor_id=request.user.id)
+
+
+@team_router.get("/{team_uuid}/export.csv")
+async def export_team_csv(
+    team_uuid: str,
+    team_controller: TeamController = Depends(Factory().get_team_controller),
+    export_controller: ExportController = Depends(Factory().get_export_controller),
+    assert_access: Callable = Depends(Permissions(TeamPermission.READ)),
+) -> Response:
+    team = await team_controller.get_by_uuid(team_uuid)
+    assert_access(team)
+    csv_content = await export_controller.export_team_summary(team.id)
+    return Response(content=csv_content, media_type="text/csv")
 
 
 @team_router.delete("/{team_uuid}", status_code=204)

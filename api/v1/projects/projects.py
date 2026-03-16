@@ -2,8 +2,9 @@ from datetime import date
 from typing import Callable
 
 from fastapi import APIRouter, Depends, Query, Request
+from fastapi.responses import Response
 
-from app.controllers import CommentController, MilestoneController, ProjectController, TaskController
+from app.controllers import CommentController, ExportController, MilestoneController, ProjectController, TaskController
 from app.models.project import ProjectPermission
 from app.schemas.extras.pagination import PaginatedResponse
 from app.schemas.requests.projects import ProjectCreate, ProjectStatusUpdate
@@ -68,6 +69,15 @@ async def create_project(
         owner_id=request.user.id,
     )
     return project
+
+
+@project_router.get("/export.csv")
+async def export_projects_csv(
+    request: Request,
+    export_controller: ExportController = Depends(Factory().get_export_controller),
+) -> Response:
+    csv_content = await export_controller.export_projects_summary(request.user.id)
+    return Response(content=csv_content, media_type="text/csv")
 
 
 @project_router.get("/{project_uuid}", response_model=ProjectResponse)
