@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends
 
-from app.controllers import TagController
+from app.controllers import AttachmentController, TagController
 from app.schemas.requests.tags import TagCreate
+from app.schemas.responses.attachments import AttachmentResponse
 from app.schemas.responses.tags import TagResponse
 from core.factory import Factory
 
@@ -41,3 +42,11 @@ async def delete_tag(
 ) -> None:
     tag = await tag_controller.get_by_uuid(tag_uuid)
     await tag_controller.delete(tag)
+
+
+@tag_router.get("/{tag_uuid}/attachments", response_model=list[AttachmentResponse])
+async def get_tag_attachments(
+    tag_uuid: str,
+    attachment_controller: AttachmentController = Depends(Factory().get_attachment_controller),
+) -> list[AttachmentResponse]:
+    return await attachment_controller.get_by_tag_uuid(tag_uuid)
