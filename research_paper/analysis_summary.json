@@ -1,0 +1,198 @@
+{
+  "baseline_lines": 2757,
+  "final_lines": 6578,
+  "growth_factor": 2.3859267319550237,
+  "final_pai": 0.6503521126760563,
+  "final_violations": 20,
+  "correctness_maintained": true,
+  "pai_growth_per_task": 0.026014084507042252,
+  "pearson_r": 0.9474236482730901,
+  "pearson_p": 7.173591853157349e-13,
+  "spearman_rho": 1.0,
+  "spearman_p": 0.0,
+  "per_task_data": [
+    {
+      "task": 1,
+      "ai_lines": 159,
+      "total_lines": 2153,
+      "P_ai": 0.07385044124477473,
+      "violations": 4
+    },
+    {
+      "task": 2,
+      "ai_lines": 324,
+      "total_lines": 2318,
+      "P_ai": 0.13977566867989646,
+      "violations": 5
+    },
+    {
+      "task": 3,
+      "ai_lines": 586,
+      "total_lines": 2580,
+      "P_ai": 0.22713178294573644,
+      "violations": 6
+    },
+    {
+      "task": 4,
+      "ai_lines": 848,
+      "total_lines": 2842,
+      "P_ai": 0.2983814215341309,
+      "violations": 7
+    },
+    {
+      "task": 5,
+      "ai_lines": 1097,
+      "total_lines": 3091,
+      "P_ai": 0.3549013264315755,
+      "violations": 8
+    },
+    {
+      "task": 6,
+      "ai_lines": 1145,
+      "total_lines": 3139,
+      "P_ai": 0.3647658489964957,
+      "violations": 8
+    },
+    {
+      "task": 7,
+      "ai_lines": 1160,
+      "total_lines": 3154,
+      "P_ai": 0.3677869372225745,
+      "violations": 8
+    },
+    {
+      "task": 8,
+      "ai_lines": 1258,
+      "total_lines": 3252,
+      "P_ai": 0.38683886838868387,
+      "violations": 8
+    },
+    {
+      "task": 9,
+      "ai_lines": 1497,
+      "total_lines": 3491,
+      "P_ai": 0.4288169578917216,
+      "violations": 9
+    },
+    {
+      "task": 10,
+      "ai_lines": 1526,
+      "total_lines": 3520,
+      "P_ai": 0.4335227272727273,
+      "violations": 9
+    },
+    {
+      "task": 11,
+      "ai_lines": 1759,
+      "total_lines": 3753,
+      "P_ai": 0.4686917132960298,
+      "violations": 10
+    },
+    {
+      "task": 12,
+      "ai_lines": 1794,
+      "total_lines": 3788,
+      "P_ai": 0.47360084477296727,
+      "violations": 10
+    },
+    {
+      "task": 13,
+      "ai_lines": 1858,
+      "total_lines": 3852,
+      "P_ai": 0.48234683281412255,
+      "violations": 10
+    },
+    {
+      "task": 14,
+      "ai_lines": 2108,
+      "total_lines": 4102,
+      "P_ai": 0.5138956606533398,
+      "violations": 11
+    },
+    {
+      "task": 15,
+      "ai_lines": 2118,
+      "total_lines": 4112,
+      "P_ai": 0.5150778210116731,
+      "violations": 11
+    },
+    {
+      "task": 16,
+      "ai_lines": 2199,
+      "total_lines": 4187,
+      "P_ai": 0.5251970384523525,
+      "violations": 11
+    },
+    {
+      "task": 17,
+      "ai_lines": 2261,
+      "total_lines": 4249,
+      "P_ai": 0.5321252059308073,
+      "violations": 11
+    },
+    {
+      "task": 18,
+      "ai_lines": 2509,
+      "total_lines": 4497,
+      "P_ai": 0.5579275072270402,
+      "violations": 14
+    },
+    {
+      "task": 19,
+      "ai_lines": 2532,
+      "total_lines": 4520,
+      "P_ai": 0.5601769911504425,
+      "violations": 14
+    },
+    {
+      "task": 20,
+      "ai_lines": 2594,
+      "total_lines": 4581,
+      "P_ai": 0.566251910063305,
+      "violations": 14
+    },
+    {
+      "task": 21,
+      "ai_lines": 2776,
+      "total_lines": 4763,
+      "P_ai": 0.5828259500314927,
+      "violations": 17
+    },
+    {
+      "task": 22,
+      "ai_lines": 3025,
+      "total_lines": 5011,
+      "P_ai": 0.6036719217721014,
+      "violations": 17
+    },
+    {
+      "task": 23,
+      "ai_lines": 3445,
+      "total_lines": 5431,
+      "P_ai": 0.6343214877554778,
+      "violations": 17
+    },
+    {
+      "task": 24,
+      "ai_lines": 3553,
+      "total_lines": 5539,
+      "P_ai": 0.6414515255461275,
+      "violations": 19
+    },
+    {
+      "task": 25,
+      "ai_lines": 3694,
+      "total_lines": 5680,
+      "P_ai": 0.6503521126760563,
+      "violations": 20
+    }
+  ],
+  "checkpoint_pai": {
+    "C0": 0.0,
+    "C0b_task5": 0.2849,
+    "C1_task8": 0.324,
+    "C2_task12": 0.4026,
+    "C3_task19": 0.4928,
+    "C4_task25": 0.5825
+  }
+}

@@ -1,0 +1,146 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath,amssymb,amsfonts}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{booktabs}
+\usepackage{geometry}
+\usepackage{authblk}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{float}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{natbib}
+
+\geometry{margin=1in}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    filecolor=magenta,      
+    urlcolor=cyan,
+    citecolor=blue,
+}
+
+\title{\textbf{Contextual Contamination and Retrieval Collapse: \\ Architectural Degradation in AI-Assisted Software Engineering}}
+\author{Arut Selvan Dhanasekaran}
+\affil{Independent Researcher \\ \texttt{arutselvan710@gmail.com}}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+As Large Language Models (LLMs) become deeply integrated into software engineering workflows, their impact on long-term architectural integrity remains poorly understood. This paper introduces the concept of \textit{Contextual Contamination}, a phenomenon where the continuous accumulation of AI-generated code ($P_{ai}$) progressively degrades a repository's architectural constraints while maintaining functional correctness. We conduct an empirical study across 25 sequential feature additions on a production-grade Python/FastAPI repository, tracking the evolution of $P_{ai}$, layer violations, cyclomatic complexity, and test correctness. Our results demonstrate a monotonic increase in $P_{ai}$ from 0\% to 65.0\%, accompanied by a steady accumulation of 20 architectural layer violations. Notably, functional correctness remained at 100\% throughout the experiment, masking the underlying structural degradation. We formalize this process as \textit{Retrieval Collapse}, where the LLM's context window becomes saturated with its own prior suboptimal outputs, creating a self-reinforcing feedback loop of architectural drift. These findings highlight a critical blind spot in current AI-assisted development paradigms: the divergence between functional validation and architectural preservation.
+\end{abstract}
+
+\section{Introduction}
+The rapid adoption of Large Language Models (LLMs) for code generation has transformed software engineering, offering unprecedented gains in developer productivity \citep{peng2023impact, ziegler2022productivity}. Modern AI coding assistants, such as GitHub Copilot and Claude Code, operate by retrieving context from the surrounding codebase to generate syntactically and functionally correct completions \citep{bubeck2024software}. However, while the short-term benefits of these tools are well-documented, their long-term impact on software architecture remains largely unexplored.
+
+Software architecture relies on strict constraints—such as layer separation, dependency inversion, and domain isolation—to ensure maintainability and scalability \citep{martin2017clean}. When human developers modify a codebase, they are guided by these implicit and explicit constraints. In contrast, LLMs rely entirely on the context provided in their prompt window. If the retrieved context contains architectural anti-patterns, the LLM is highly likely to replicate and amplify them, a phenomenon we term \textit{Contextual Contamination}.
+
+In this paper, we investigate the longitudinal effects of AI-assisted development on architectural integrity. We hypothesize that as the proportion of AI-generated code ($P_{ai}$) in a repository increases, the probability of architectural violations also increases, eventually leading to \textit{Retrieval Collapse}—a state where the LLM's context is so saturated with its own prior outputs that it can no longer infer or adhere to the original architectural constraints.
+
+To test this hypothesis, we designed an empirical study involving 25 sequential feature additions on a clean, production-grade Python/FastAPI repository. We continuously monitored $P_{ai}$, layer violations, cyclomatic complexity, and functional correctness. Our findings reveal a stark divergence: while the AI maintained 100\% functional correctness, it systematically degraded the repository's architecture, introducing 20 layer violations as $P_{ai}$ grew to 65.0\%.
+
+\section{Methodology}
+
+\subsection{Experimental Design}
+We selected a production-grade Python/FastAPI boilerplate repository (\texttt{iam-abbas/FastAPI-Production-Boilerplate}) as our baseline ($C_0$). This repository enforces a strict three-layer architecture: Controllers (API routing), Services (business logic), and Repositories (database access). 
+
+We designed 25 sequential feature addition tasks, divided into four phases of increasing complexity:
+\begin{enumerate}
+    \item \textbf{Phase 1: Foundation (Tasks 1--5):} Basic CRUD operations for new entities (Categories, Tags, Projects, Teams, Comments).
+    \item \textbf{Phase 2: Relationships (Tasks 6--12):} Cross-entity relationships, foreign keys, and multi-table joins.
+    \item \textbf{Phase 3: Business Logic (Tasks 13--19):} State machines, approval workflows, and complex domain rules.
+    \item \textbf{Phase 4: Cross-Cutting (Tasks 20--25):} Soft deletes, activity logging, pagination, search, and bulk imports/exports.
+\end{enumerate}
+
+Each task was executed autonomously by Claude 3.7 Sonnet via the Claude Code CLI, using a standardized prompt. After each task, the generated code was committed, and a comprehensive test suite was executed to verify functional correctness.
+
+\subsection{Metrics Collection}
+We developed a custom research infrastructure to collect metrics at each commit:
+\begin{itemize}
+    \item \textbf{Synthetic Code Ratio ($P_{ai}$):} The proportion of lines authored by the AI, calculated using \texttt{git blame}.
+    \item \textbf{Layer Violations:} The number of instances where a higher-level layer directly imported or invoked a lower-level layer, bypassing the intermediate layer (e.g., a Controller directly accessing a Repository).
+    \item \textbf{Cyclomatic Complexity:} The average McCabe complexity of all functions in the repository.
+    \item \textbf{Functional Correctness:} The pass rate of the repository's automated test suite (27 tests).
+\end{itemize}
+
+\section{Results}
+
+\subsection{The Growth of Contextual Contamination}
+Over the course of 25 tasks, the repository grew from 2,757 lines of code to 6,578 lines (a 2.39x increase). The Synthetic Code Ratio ($P_{ai}$) grew monotonically from 0\% to 65.0\% (Figure \ref{fig:pai_growth}). The growth was highly linear, with a Pearson correlation coefficient of $r = 0.947$ ($p < 10^{-12}$) between the task number and $P_{ai}$.
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{../figures/fig1_pai_growth.png}
+    \caption{The monotonic growth of the Synthetic Code Ratio ($P_{ai}$) across 25 tasks. Functional correctness remained at 100\% throughout the experiment.}
+    \label{fig:pai_growth}
+\end{figure}
+
+\subsection{Architectural Degradation}
+As $P_{ai}$ increased, we observed a steady accumulation of architectural layer violations. The baseline repository ($C_0$) contained zero violations. By Task 25, the AI had introduced 20 distinct \texttt{LAYER\_SKIP} violations, where Controllers directly imported Repositories, bypassing the Service layer (Figure \ref{fig:dashboard}).
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=0.9\textwidth]{../figures/fig4_dashboard.png}
+    \caption{Comprehensive metrics dashboard showing the divergence between functional correctness (Panel C) and architectural integrity (Panel B).}
+    \label{fig:dashboard}
+\end{figure}
+
+The violations accelerated during Phase 3 (Business Logic) and Phase 4 (Cross-Cutting Concerns). As the tasks required interacting with multiple entities simultaneously, the AI increasingly opted for the path of least resistance—directly injecting Repositories into Controllers rather than orchestrating them through Services.
+
+\subsection{The Illusion of Correctness}
+Perhaps the most striking finding is that functional correctness remained at exactly 100\% (27/27 tests passing) for all 25 tasks. The AI successfully implemented complex features, updated database schemas, and satisfied all behavioral requirements. However, this functional success masked the underlying structural degradation. Standard CI/CD pipelines, which rely heavily on unit and integration tests, are entirely blind to Contextual Contamination.
+
+\subsection{Simplification and Homogenization}
+Interestingly, the average cyclomatic complexity of the repository decreased from 1.91 to 1.60. This suggests that the AI tends to generate simpler, more uniform functions compared to human developers. While lower complexity is generally desirable, in this context, it reflects the AI's tendency to write flat, procedural code rather than utilizing appropriate abstractions or design patterns.
+
+\section{Discussion: Retrieval Collapse}
+We formalize the observed phenomenon as \textbf{Retrieval Collapse}. When an LLM generates code that slightly deviates from the repository's architectural constraints (e.g., a minor layer violation), that code is committed and becomes part of the repository's context. In subsequent tasks, the LLM retrieves this contaminated context. Because LLMs are highly sensitive to in-context examples, they treat the prior violation as a valid pattern and replicate it.
+
+This creates a self-reinforcing feedback loop:
+\begin{equation}
+    P(Violation_{t+1}) \propto f(P_{ai}, Violations_{t})
+\end{equation}
+
+As $P_{ai}$ crosses a critical threshold (in our study, around 40-50\%), the LLM's context window becomes saturated with its own prior outputs. The original human-authored architectural constraints are drowned out by the volume of AI-generated procedural code. The architecture "collapses" into whatever patterns the LLM finds most statistically probable, which are typically flat, unlayered structures.
+
+\section{Conclusion}
+This study provides empirical evidence that continuous AI-assisted development leads to Contextual Contamination and architectural degradation, even when functional correctness is perfectly maintained. As the software industry increasingly relies on autonomous coding agents, we must develop new classes of static analysis tools—architectural linters and dependency graph validators—to detect and prevent Retrieval Collapse before it renders codebases unmaintainable.
+
+\bibliographystyle{plainnat}
+\begin{thebibliography}{3}
+\providecommand{\natexlab}[1]{#1}
+\providecommand{\url}[1]{\texttt{#1}}
+\expandafter\ifx\csname urlstyle\endcsname\relax
+  \providecommand{\doi}[1]{doi: #1}\else
+  \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[Bubeck et~al.(2024)Bubeck, Chandrasekaran, Eldan, Gehrke, Horvitz, Kamar, Lee, Lee, Li, Lundberg, et~al.]{bubeck2024software}
+S{\'e}bastien Bubeck, Varun Chandrasekaran, Ronen Eldan, Johannes Gehrke, Eric Horvitz, Ece Kamar, Peter Lee, Yin~Tat Lee, Yuanzhi Li, Scott Lundberg, et~al.
+\newblock Software engineering in the era of large language models.
+\newblock \emph{arXiv preprint arXiv:2402.04251}, 2024.
+
+\bibitem[Martin(2017)]{martin2017clean}
+Robert~C Martin.
+\newblock \emph{Clean architecture: a craftsman's guide to software structure and design}.
+\newblock Prentice Hall Press, 2017.
+
+\bibitem[Peng et~al.(2023)Peng, Kalliamvakou, Cihon, and Demirer]{peng2023impact}
+Sida Peng, Eirini Kalliamvakou, Peter Cihon, and Mert Demirer.
+\newblock The impact of ai on developer productivity: Evidence from github copilot.
+\newblock \emph{arXiv preprint arXiv:2302.06590}, 2023.
+
+\bibitem[Ziegler et~al.(2022)Ziegler, Kalliamvakou, Li, Zimmermann, Bird, Chen, Kelly, and Murphy]{ziegler2022productivity}
+Albert Ziegler, Eirini Kalliamvakou, X~Alice Li, Thomas Zimmermann, Christian Bird, Hao Chen, Trevor Kelly, and Brendan Murphy.
+\newblock Productivity assessment of neural code completion.
+\newblock In \emph{Proceedings of the 6th ACM SIGPLAN International Symposium on Machine Programming}, pages 21--29, 2022.
+
+\end{thebibliography}
+
+\end{document}
