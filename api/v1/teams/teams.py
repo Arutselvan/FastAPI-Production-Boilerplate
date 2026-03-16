@@ -82,6 +82,14 @@ async def get_team_milestones(
     return milestones
 
 
+@team_router.post("/{team_uuid}/archive-projects")
+async def archive_team_projects(
+    team_uuid: str,
+    project_controller: ProjectController = Depends(Factory().get_project_controller),
+) -> dict:
+    return await project_controller.bulk_archive_team_projects(team_uuid)
+
+
 @team_router.delete("/{team_uuid}", status_code=204)
 async def delete_team(
     team_uuid: str,

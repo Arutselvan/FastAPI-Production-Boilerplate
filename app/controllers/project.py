@@ -1,5 +1,5 @@
 from app.models import Project, Tag
-from app.repositories import ProjectRepository
+from app.repositories import MilestoneRepository, ProjectRepository, TeamRepository
 from core.controller import BaseController
 from core.database.transactional import Propagation, Transactional
 from app.models.project import ProjectStatus
@@ -9,9 +9,16 @@ from core.exceptions import BadRequestException, NotFoundException
 class ProjectController(BaseController[Project]):
     """Project controller."""
 
-    def __init__(self, project_repository: ProjectRepository):
+    def __init__(
+        self,
+        project_repository: ProjectRepository,
+        milestone_repository: MilestoneRepository | None = None,
+        team_repository: TeamRepository | None = None,
+    ):
         super().__init__(model=Project, repository=project_repository)
         self.project_repository = project_repository
+        self.milestone_repository = milestone_repository
+        self.team_repository = team_repository
 
     async def get_by_team_id(self, team_id: int) -> list[Project]:
         """
@@ -97,3 +104,20 @@ class ProjectController(BaseController[Project]):
             )
 
         return await self.project_repository.update_status(project.id, target.value)
+
+    @Transactional(propagation=Propagation.REQUIRED)
+    async def bulk_archive_team_projects(self, team_uuid: str) -> dict:
+        """Bulk-archive all projects for a team and complete their milestones."""
+        team = await self.team_repository.get_by("uuid", team_uuid, unique=True)
+        projects = await self.project_repository.get_by_team_id(team.id)
+        project_ids = [p.id for p in projects]
+
+        archived_count = await self.project_repository.bulk_archive_by_team_id(team.id)
+        completed_count = await self.milestone_repository.bulk_complete_by_project_ids(
+            project_ids
+        )
+
+        return {
+            "archived_projects": archived_count,
+            "completed_milestones": completed_count,
+        }

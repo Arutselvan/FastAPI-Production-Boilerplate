@@ -43,7 +43,9 @@ class Factory:
 
     def get_project_controller(self, db_session=Depends(get_session)):
         return ProjectController(
-            project_repository=self.project_repository(db_session=db_session)
+            project_repository=self.project_repository(db_session=db_session),
+            milestone_repository=self.milestone_repository(db_session=db_session),
+            team_repository=self.team_repository(db_session=db_session),
         )
 
     def get_task_controller(self, db_session=Depends(get_session)):

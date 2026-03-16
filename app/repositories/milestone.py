@@ -1,4 +1,4 @@
-from sqlalchemy import Select, select
+from sqlalchemy import Select, select, update
 from sqlalchemy.orm import joinedload
 
 from app.models import Milestone, Project
@@ -28,6 +28,21 @@ class MilestoneRepository(BaseRepository[Milestone]):
             .where(Project.team_id == team_id)
         )
         return await self._all(query)
+
+    async def bulk_complete_by_project_ids(self, project_ids: list[int]) -> int:
+        """Set is_completed to True for all milestones in the given projects.
+
+        Returns the number of completed milestones.
+        """
+        if not project_ids:
+            return 0
+        stmt = (
+            update(Milestone)
+            .where(Milestone.project_id.in_(project_ids))
+            .values(is_completed=True)
+        )
+        result = await self.session.execute(stmt)
+        return result.rowcount
 
     def _join_project(self, query: Select) -> Select:
         """Join the project relationship."""

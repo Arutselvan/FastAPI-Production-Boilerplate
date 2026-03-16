@@ -98,6 +98,19 @@ class ProjectRepository(BaseRepository[Project]):
         result = await self.session.scalars(stmt)
         return result.one()
 
+    async def bulk_archive_by_team_id(self, team_id: int) -> int:
+        """Set status to 'archived' for all projects with the given team_id.
+
+        Returns the number of archived projects.
+        """
+        stmt = (
+            update(Project)
+            .where(Project.team_id == team_id)
+            .values(status="archived")
+        )
+        result = await self.session.execute(stmt)
+        return result.rowcount
+
     def _join_owner(self, query: Select) -> Select:
         """
         Join the owner relationship.
