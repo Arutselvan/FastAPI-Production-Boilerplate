@@ -2,9 +2,11 @@ from typing import Callable
 
 from fastapi import APIRouter, Depends, Request
 
-from app.controllers import TeamController
+from app.controllers import ProjectController, TeamController
+from app.models.project import ProjectPermission
 from app.models.team import TeamPermission
 from app.schemas.requests.teams import TeamCreate
+from app.schemas.responses.projects import ProjectResponse
 from app.schemas.responses.teams import TeamResponse
 from core.factory import Factory
 from core.fastapi.dependencies.permissions import Permissions
@@ -48,6 +50,20 @@ async def get_team(
 
     assert_access(team)
     return team
+
+
+@team_router.get("/{team_uuid}/projects", response_model=list[ProjectResponse])
+async def get_team_projects(
+    team_uuid: str,
+    team_controller: TeamController = Depends(Factory().get_team_controller),
+    project_controller: ProjectController = Depends(Factory().get_project_controller),
+    assert_access: Callable = Depends(Permissions(ProjectPermission.READ)),
+) -> list[ProjectResponse]:
+    team = await team_controller.get_by_uuid(team_uuid)
+    projects = await project_controller.get_by_team_id(team.id)
+
+    assert_access(projects)
+    return projects
 
 
 @team_router.delete("/{team_uuid}", status_code=204)

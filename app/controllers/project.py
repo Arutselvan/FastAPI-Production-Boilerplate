@@ -11,6 +11,16 @@ class ProjectController(BaseController[Project]):
         super().__init__(model=Project, repository=project_repository)
         self.project_repository = project_repository
 
+    async def get_by_team_id(self, team_id: int) -> list[Project]:
+        """
+        Returns a list of projects based on team_id.
+
+        :param team_id: The team id.
+        :return: A list of projects.
+        """
+
+        return await self.project_repository.get_by_team_id(team_id)
+
     async def get_by_owner_id(self, owner_id: int) -> list[Project]:
         """
         Returns a list of projects based on owner_id.

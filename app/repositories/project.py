@@ -28,6 +28,24 @@ class ProjectRepository(BaseRepository[Project]):
 
         return await self._all(query)
 
+    async def get_by_team_id(
+        self, team_id: int, join_: set[str] | None = None
+    ) -> list[Project]:
+        """
+        Get all projects by team id.
+
+        :param team_id: The team id to match.
+        :param join_: The joins to make.
+        :return: A list of projects.
+        """
+        query = self._query(join_)
+        query = self._get_by(query, "team_id", team_id)
+
+        if join_ is not None:
+            return await self.all_unique(query)
+
+        return await self._all(query)
+
     async def get_by_name(self, name: str) -> Project | None:
         """
         Get project by name.

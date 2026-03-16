@@ -33,7 +33,11 @@ class Project(Base, TimestampMixin):
     owner_id = Column(
         BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
+    team_id = Column(
+        BigInteger, ForeignKey("teams.id", ondelete="SET NULL"), nullable=True
+    )
     owner = relationship("User", back_populates="projects", uselist=False, lazy="raise")
+    team = relationship("Team", backref="projects", uselist=False, lazy="raise")
     comments = relationship(
         "Comment", back_populates="project", lazy="raise", passive_deletes=True
     )
