@@ -1,5 +1,6 @@
 from core.database import Base
 
+from .approval import Approval
 from .attachment import Attachment
 from .comment import Comment
 from .category import Category

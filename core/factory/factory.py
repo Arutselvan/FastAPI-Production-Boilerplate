@@ -2,9 +2,9 @@ from functools import partial
 
 from fastapi import Depends
 
-from app.controllers import AttachmentController, AuthController, CategoryController, CommentController, MilestoneController, ProjectController, TagController, TaskController, TeamController, UserController
-from app.models import Attachment, Category, Comment, Milestone, Project, Tag, Task, Team, User
-from app.repositories import AttachmentRepository, CategoryRepository, CommentRepository, MilestoneRepository, ProjectRepository, TagRepository, TaskRepository, TeamRepository, UserRepository
+from app.controllers import ApprovalController, AttachmentController, AuthController, CategoryController, CommentController, MilestoneController, ProjectController, TagController, TaskController, TeamController, UserController
+from app.models import Approval, Attachment, Category, Comment, Milestone, Project, Tag, Task, Team, User
+from app.repositories import ApprovalRepository, AttachmentRepository, CategoryRepository, CommentRepository, MilestoneRepository, ProjectRepository, TagRepository, TaskRepository, TeamRepository, UserRepository
 from core.database import get_session
 
 
@@ -15,6 +15,7 @@ class Factory:
     """
 
     # Repositories
+    approval_repository = partial(ApprovalRepository, Approval)
     attachment_repository = partial(AttachmentRepository, Attachment)
     comment_repository = partial(CommentRepository, Comment)
     category_repository = partial(CategoryRepository, Category)
@@ -24,6 +25,11 @@ class Factory:
     task_repository = partial(TaskRepository, Task)
     team_repository = partial(TeamRepository, Team)
     user_repository = partial(UserRepository, User)
+
+    def get_approval_controller(self, db_session=Depends(get_session)):
+        return ApprovalController(
+            approval_repository=self.approval_repository(db_session=db_session)
+        )
 
     def get_attachment_controller(self, db_session=Depends(get_session)):
         return AttachmentController(

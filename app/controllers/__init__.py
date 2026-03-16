@@ -1,3 +1,4 @@
+from .approval import ApprovalController
 from .attachment import AttachmentController
 from .auth import AuthController
 from .comment import CommentController
@@ -10,6 +11,7 @@ from .team import TeamController
 from .user import UserController
 
 __all__ = [
+    "ApprovalController",
     "AttachmentController",
     "AuthController",
     "CommentController",
