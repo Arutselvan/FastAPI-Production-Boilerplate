@@ -2,9 +2,10 @@ from typing import Callable
 
 from fastapi import APIRouter, Depends, Request
 
-from app.controllers import ProjectController
+from app.controllers import CommentController, ProjectController
 from app.models.project import ProjectPermission
 from app.schemas.requests.projects import ProjectCreate
+from app.schemas.responses.comments import CommentResponse
 from app.schemas.responses.projects import ProjectResponse
 from core.factory import Factory
 from core.fastapi.dependencies.permissions import Permissions
@@ -60,3 +61,17 @@ async def delete_project(
 
     assert_access(project)
     await project_controller.delete(project)
+
+
+@project_router.get("/{project_uuid}/comments", response_model=list[CommentResponse])
+async def get_project_comments(
+    project_uuid: str,
+    project_controller: ProjectController = Depends(Factory().get_project_controller),
+    comment_controller: CommentController = Depends(Factory().get_comment_controller),
+    assert_access: Callable = Depends(Permissions(ProjectPermission.READ)),
+) -> list[CommentResponse]:
+    project = await project_controller.get_by_uuid(project_uuid)
+
+    assert_access(project)
+    comments = await comment_controller.get_by_project_id(project.id)
+    return comments
