@@ -65,7 +65,7 @@ class BaseRepository(Generic[ModelType]):
         :return: The model instance.
         """
         query = self._query(join_)
-        query = await self._get_by(query, field, value)
+        query = self._get_by(query, field, value)
 
         if join_ is not None:
             return await self.all_unique(query)
@@ -150,7 +150,7 @@ class BaseRepository(Generic[ModelType]):
         query = await self.session.scalars(select(func.count()).select_from(query))
         return query.one()
 
-    async def _sort_by(
+    def _sort_by(
         self,
         query: Select,
         sort_by: str,
@@ -182,7 +182,7 @@ class BaseRepository(Generic[ModelType]):
 
         return query.order_by(order_column.asc())
 
-    async def _get_by(self, query: Select, field: str, value: Any) -> Select:
+    def _get_by(self, query: Select, field: str, value: Any) -> Select:
         """
         Returns the query filtered by the given column.
 

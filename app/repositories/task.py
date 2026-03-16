@@ -20,8 +20,8 @@ class TaskRepository(BaseRepository[Task]):
         :param join_: The joins to make.
         :return: A list of tasks.
         """
-        query = await self._query(join_)
-        query = await self._get_by(query, "task_author_id", author_id)
+        query = self._query(join_)
+        query = self._get_by(query, "task_author_id", author_id)
 
         if join_ is not None:
             return await self.all_unique(query)
