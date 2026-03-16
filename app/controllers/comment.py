@@ -39,3 +39,8 @@ class CommentController(BaseController[Comment]):
                 "project_id": project_id,
             }
         )
+
+    @Transactional(propagation=Propagation.REQUIRED)
+    async def delete(self, model: Comment) -> None:
+        """Soft deletes a comment."""
+        await self.comment_repository.soft_delete(model.id)

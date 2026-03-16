@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from sqlalchemy import Select
 from sqlalchemy.orm import joinedload
 
@@ -7,6 +9,15 @@ from core.repository import BaseRepository
 
 class CommentRepository(BaseRepository[Comment]):
     """Comment repository provides all the database operations for the Comment model."""
+
+    def _query(
+        self,
+        join_: set[str] | None = None,
+        order_: dict | None = None,
+    ) -> Select:
+        query = super()._query(join_, order_)
+        query = query.where(Comment.deleted_at.is_(None))
+        return query
 
     async def get_by_project_id(
         self, project_id: int, join_: set[str] | None = None
@@ -31,6 +42,12 @@ class CommentRepository(BaseRepository[Comment]):
             return await self.all_unique(query)
 
         return await self._all(query)
+
+    async def soft_delete(self, id: int) -> None:
+        """Soft delete a comment by setting deleted_at."""
+        comments = await self.get_by(field="id", value=id, unique=True)
+        if comments:
+            comments.deleted_at = datetime.utcnow()
 
     def _join_author(self, query: Select) -> Select:
         """Join the author relationship."""

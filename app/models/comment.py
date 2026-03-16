@@ -6,7 +6,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from core.database import Base
-from core.database.mixins import TimestampMixin
+from core.database.mixins import SoftDeleteMixin, TimestampMixin
 from core.security.access_control import (
     Allow,
     Authenticated,
@@ -22,7 +22,7 @@ class CommentPermission(Enum):
     DELETE = "delete"
 
 
-class Comment(Base, TimestampMixin):
+class Comment(Base, TimestampMixin, SoftDeleteMixin):
     __tablename__ = "comments"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)

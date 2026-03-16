@@ -6,7 +6,7 @@ from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
 from core.database import Base
-from core.database.mixins import TimestampMixin
+from core.database.mixins import SoftDeleteMixin, TimestampMixin
 from core.security.access_control import (
     Allow,
     Authenticated,
@@ -22,7 +22,7 @@ class AttachmentPermission(Enum):
     DELETE = "delete"
 
 
-class Attachment(Base, TimestampMixin):
+class Attachment(Base, TimestampMixin, SoftDeleteMixin):
     __tablename__ = "attachments"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)

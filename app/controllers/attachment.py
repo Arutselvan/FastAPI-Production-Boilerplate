@@ -42,3 +42,8 @@ class AttachmentController(BaseController[Attachment]):
                 "uploaded_by": uploaded_by,
             }
         )
+
+    @Transactional(propagation=Propagation.REQUIRED)
+    async def delete(self, model: Attachment) -> None:
+        """Soft deletes an attachment."""
+        await self.attachment_repository.soft_delete(model.id)
