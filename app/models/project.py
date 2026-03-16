@@ -1,7 +1,7 @@
 from enum import Enum
 from uuid import uuid4
 
-from sqlalchemy import BigInteger, Column, ForeignKey, Unicode
+from sqlalchemy import BigInteger, Column, ForeignKey, Table, Unicode
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -12,6 +12,13 @@ from core.security.access_control import (
     Authenticated,
     RolePrincipal,
     UserPrincipal,
+)
+
+project_tags = Table(
+    "project_tags",
+    Base.metadata,
+    Column("project_id", BigInteger, ForeignKey("projects.id", ondelete="CASCADE"), primary_key=True),
+    Column("tag_id", BigInteger, ForeignKey("tags.id", ondelete="CASCADE"), primary_key=True),
 )
 
 
@@ -41,6 +48,7 @@ class Project(Base, TimestampMixin):
     comments = relationship(
         "Comment", back_populates="project", lazy="raise", passive_deletes=True
     )
+    tags = relationship("Tag", secondary=project_tags, lazy="raise")
 
     __mapper_args__ = {"eager_defaults": True}
 

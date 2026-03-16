@@ -1,7 +1,8 @@
-from app.models import Project
+from app.models import Project, Tag
 from app.repositories import ProjectRepository
 from core.controller import BaseController
 from core.database.transactional import Propagation, Transactional
+from core.exceptions import NotFoundException
 
 
 class ProjectController(BaseController[Project]):
@@ -49,3 +50,26 @@ class ProjectController(BaseController[Project]):
                 "owner_id": owner_id,
             }
         )
+
+    @Transactional(propagation=Propagation.REQUIRED)
+    async def assign_tag(self, project_uuid: str, tag_uuid: str) -> None:
+        """Assign a tag to a project."""
+        project = await self.get_by_uuid(project_uuid)
+        tag = await self.project_repository.get_tag_by_uuid(tag_uuid)
+        if not tag:
+            raise NotFoundException(f"Tag with uuid: {tag_uuid} does not exist")
+        await self.project_repository.assign_tag(project.id, tag.id)
+
+    @Transactional(propagation=Propagation.REQUIRED)
+    async def remove_tag(self, project_uuid: str, tag_uuid: str) -> None:
+        """Remove a tag from a project."""
+        project = await self.get_by_uuid(project_uuid)
+        tag = await self.project_repository.get_tag_by_uuid(tag_uuid)
+        if not tag:
+            raise NotFoundException(f"Tag with uuid: {tag_uuid} does not exist")
+        await self.project_repository.remove_tag(project.id, tag.id)
+
+    async def get_tags(self, project_uuid: str) -> list[Tag]:
+        """Get all tags for a project."""
+        project = await self.get_by_uuid(project_uuid)
+        return await self.project_repository.get_tags(project.id)

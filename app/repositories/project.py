@@ -1,7 +1,8 @@
-from sqlalchemy import Select
+from sqlalchemy import Select, delete, insert, select
 from sqlalchemy.orm import joinedload
 
-from app.models import Project
+from app.models import Project, Tag
+from app.models.project import project_tags
 from core.repository import BaseRepository
 
 
@@ -56,6 +57,35 @@ class ProjectRepository(BaseRepository[Project]):
         query = self._query()
         query = query.filter(Project.name == name)
         return await self._one_or_none(query)
+
+    async def get_tag_by_uuid(self, tag_uuid: str) -> Tag | None:
+        """Get a tag by its UUID."""
+        query = select(Tag).where(Tag.uuid == tag_uuid)
+        result = await self.session.scalars(query)
+        return result.one_or_none()
+
+    async def assign_tag(self, project_id: int, tag_id: int) -> None:
+        """Assign a tag to a project."""
+        stmt = insert(project_tags).values(project_id=project_id, tag_id=tag_id)
+        await self.session.execute(stmt)
+
+    async def remove_tag(self, project_id: int, tag_id: int) -> None:
+        """Remove a tag from a project."""
+        stmt = delete(project_tags).where(
+            project_tags.c.project_id == project_id,
+            project_tags.c.tag_id == tag_id,
+        )
+        await self.session.execute(stmt)
+
+    async def get_tags(self, project_id: int) -> list[Tag]:
+        """Get all tags for a project."""
+        query = (
+            select(Tag)
+            .join(project_tags, project_tags.c.tag_id == Tag.id)
+            .where(project_tags.c.project_id == project_id)
+        )
+        result = await self.session.scalars(query)
+        return result.all()
 
     def _join_owner(self, query: Select) -> Select:
         """
