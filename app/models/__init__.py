@@ -10,3 +10,4 @@ from .tag import Tag
 from .task import Task
 from .team import Team
 from .user import User
+from .user_role import UserRole

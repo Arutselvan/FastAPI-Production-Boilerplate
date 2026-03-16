@@ -2,9 +2,10 @@ from functools import partial
 
 from fastapi import Depends
 
-from app.controllers import ApprovalController, AttachmentController, AuthController, CategoryController, CommentController, MilestoneController, ProjectController, TagController, TaskController, TeamController, UserController
+from app.controllers import ApprovalController, AttachmentController, AuthController, CategoryController, CommentController, MilestoneController, ProjectController, TagController, TaskController, TeamController, UserController, UserRoleController
 from app.models import Approval, Attachment, Category, Comment, Milestone, Project, Tag, Task, Team, User
-from app.repositories import ApprovalRepository, AttachmentRepository, CategoryRepository, CommentRepository, MilestoneRepository, ProjectRepository, TagRepository, TaskRepository, TeamRepository, UserRepository
+from app.models.user_role import UserRole
+from app.repositories import ApprovalRepository, AttachmentRepository, CategoryRepository, CommentRepository, MilestoneRepository, ProjectRepository, TagRepository, TaskRepository, TeamRepository, UserRepository, UserRoleRepository
 from core.database import get_session
 
 
@@ -25,10 +26,13 @@ class Factory:
     task_repository = partial(TaskRepository, Task)
     team_repository = partial(TeamRepository, Team)
     user_repository = partial(UserRepository, User)
+    user_role_repository = partial(UserRoleRepository, UserRole)
 
     def get_approval_controller(self, db_session=Depends(get_session)):
         return ApprovalController(
-            approval_repository=self.approval_repository(db_session=db_session)
+            approval_repository=self.approval_repository(db_session=db_session),
+            milestone_repository=self.milestone_repository(db_session=db_session),
+            user_role_repository=self.user_role_repository(db_session=db_session),
         )
 
     def get_attachment_controller(self, db_session=Depends(get_session)):
@@ -77,6 +81,11 @@ class Factory:
     def get_comment_controller(self, db_session=Depends(get_session)):
         return CommentController(
             comment_repository=self.comment_repository(db_session=db_session)
+        )
+
+    def get_user_role_controller(self, db_session=Depends(get_session)):
+        return UserRoleController(
+            user_role_repository=self.user_role_repository(db_session=db_session)
         )
 
     def get_auth_controller(self, db_session=Depends(get_session)):

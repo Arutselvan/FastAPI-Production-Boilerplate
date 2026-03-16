@@ -8,6 +8,7 @@ from .tag import TagRepository
 from .task import TaskRepository
 from .team import TeamRepository
 from .user import UserRepository
+from .user_role import UserRoleRepository
 
 __all__ = [
     "ApprovalRepository",
@@ -20,4 +21,5 @@ __all__ = [
     "TaskRepository",
     "TeamRepository",
     "UserRepository",
+    "UserRoleRepository",
 ]

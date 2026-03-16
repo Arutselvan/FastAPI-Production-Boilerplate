@@ -9,6 +9,7 @@ from .tag import TagController
 from .task import TaskController
 from .team import TeamController
 from .user import UserController
+from .user_role import UserRoleController
 
 __all__ = [
     "ApprovalController",
@@ -22,4 +23,5 @@ __all__ = [
     "TaskController",
     "TeamController",
     "UserController",
+    "UserRoleController",
 ]
