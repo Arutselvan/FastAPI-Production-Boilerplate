@@ -5,6 +5,7 @@ from .auth import AuthController
 from .comment import CommentController
 from .category import CategoryController
 from .export import ExportController
+from .import_controller import ImportController
 from .milestone import MilestoneController
 from .project import ProjectController
 from .tag import TagController
@@ -21,6 +22,7 @@ __all__ = [
     "CommentController",
     "CategoryController",
     "ExportController",
+    "ImportController",
     "MilestoneController",
     "ProjectController",
     "TagController",
