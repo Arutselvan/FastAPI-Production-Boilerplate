@@ -51,6 +51,14 @@ class ProjectController(BaseController[Project]):
 
         return await self.project_repository.get_by_owner_id(owner_id)
 
+    async def get_by_owner_id_paginated(
+        self, owner_id: int, limit: int = 20, offset: int = 0
+    ) -> list[Project]:
+        return await self.project_repository.get_by_owner_id_paginated(owner_id, limit, offset)
+
+    async def count_by_owner_id(self, owner_id: int) -> int:
+        return await self.project_repository.count_by_owner_id(owner_id)
+
     @Transactional(propagation=Propagation.REQUIRED)
     async def add(self, name: str, description: str, owner_id: int) -> Project:
         """

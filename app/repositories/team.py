@@ -28,6 +28,19 @@ class TeamRepository(BaseRepository[Team]):
 
         return await self._all(query)
 
+    async def get_by_owner_id_paginated(
+        self, owner_id: int, limit: int = 20, offset: int = 0
+    ) -> list[Team]:
+        query = self._query()
+        query = self._get_by(query, "owner_id", owner_id)
+        query = query.offset(offset).limit(limit)
+        return await self._all(query)
+
+    async def count_by_owner_id(self, owner_id: int) -> int:
+        query = self._query()
+        query = self._get_by(query, "owner_id", owner_id)
+        return await self._count(query)
+
     async def get_by_name(self, name: str) -> Team | None:
         """
         Get team by name.

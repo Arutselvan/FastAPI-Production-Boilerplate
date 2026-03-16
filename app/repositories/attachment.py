@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import Select, select
+from sqlalchemy import Select, func, select
 from sqlalchemy.orm import joinedload
 
 from app.models import Attachment, Comment, Project, Tag
@@ -49,6 +49,11 @@ class AttachmentRepository(BaseRepository[Attachment]):
             .where(Attachment.deleted_at.is_(None))
         )
         return await self._all(query)
+
+    async def count(self) -> int:
+        """Count non-deleted attachments."""
+        query = self._query()
+        return await self._count(query)
 
     async def soft_delete(self, id: int) -> None:
         """Soft delete an attachment by setting deleted_at."""

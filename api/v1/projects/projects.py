@@ -1,9 +1,10 @@
 from typing import Callable
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 
 from app.controllers import CommentController, MilestoneController, ProjectController, TaskController
 from app.models.project import ProjectPermission
+from app.schemas.extras.pagination import PaginatedResponse
 from app.schemas.requests.projects import ProjectCreate, ProjectStatusUpdate
 from app.schemas.responses.comments import CommentResponse
 from app.schemas.responses.milestones import MilestoneResponse
@@ -15,16 +16,21 @@ from core.fastapi.dependencies.permissions import Permissions
 project_router = APIRouter()
 
 
-@project_router.get("/", response_model=list[ProjectResponse])
+@project_router.get("/", response_model=PaginatedResponse[ProjectResponse])
 async def get_projects(
     request: Request,
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
     project_controller: ProjectController = Depends(Factory().get_project_controller),
     assert_access: Callable = Depends(Permissions(ProjectPermission.READ)),
-) -> list[ProjectResponse]:
-    projects = await project_controller.get_by_owner_id(request.user.id)
+) -> PaginatedResponse[ProjectResponse]:
+    items = await project_controller.get_by_owner_id_paginated(
+        request.user.id, limit=limit, offset=offset
+    )
+    total = await project_controller.count_by_owner_id(request.user.id)
 
-    assert_access(projects)
-    return projects
+    assert_access(items)
+    return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)
 
 
 @project_router.post("/", response_model=ProjectResponse, status_code=201)

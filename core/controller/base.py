@@ -69,6 +69,23 @@ class BaseController(Generic[ModelType]):
         response = await self.repository.get_all(skip, limit, join_)
         return response
 
+    async def get_paginated(
+        self, limit: int = 20, offset: int = 0, join_: set[str] | None = None
+    ) -> list[ModelType]:
+        """
+        Returns a paginated list of records.
+
+        :param limit: The number of records to return.
+        :param offset: The number of records to skip.
+        :param join_: The joins to make.
+        :return: A list of records.
+        """
+        return await self.repository.get_paginated(limit, offset, join_)
+
+    async def count(self) -> int:
+        """Returns the total count of records."""
+        return await self.repository.count()
+
     @Transactional(propagation=Propagation.REQUIRED)
     async def create(self, attributes: dict[str, Any]) -> ModelType:
         """

@@ -1,9 +1,10 @@
 from typing import Callable
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 
 from app.controllers import AttachmentController, CommentController, ProjectController
 from app.models.comment import CommentPermission
+from app.schemas.extras.pagination import PaginatedResponse
 from app.schemas.requests.comments import CommentCreate
 from app.schemas.responses.attachments import AttachmentResponse
 from app.schemas.responses.comments import CommentResponse
@@ -13,16 +14,21 @@ from core.fastapi.dependencies.permissions import Permissions
 comment_router = APIRouter()
 
 
-@comment_router.get("/", response_model=list[CommentResponse])
+@comment_router.get("/", response_model=PaginatedResponse[CommentResponse])
 async def get_comments(
     request: Request,
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
     comment_controller: CommentController = Depends(Factory().get_comment_controller),
     assert_access: Callable = Depends(Permissions(CommentPermission.READ)),
-) -> list[CommentResponse]:
-    comments = await comment_controller.get_by_author_id(request.user.id)
+) -> PaginatedResponse[CommentResponse]:
+    items = await comment_controller.get_by_author_id_paginated(
+        request.user.id, limit=limit, offset=offset
+    )
+    total = await comment_controller.count_by_author_id(request.user.id)
 
-    assert_access(comments)
-    return comments
+    assert_access(items)
+    return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)
 
 
 @comment_router.post("/", response_model=CommentResponse, status_code=201)

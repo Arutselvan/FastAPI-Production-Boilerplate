@@ -46,8 +46,36 @@ class BaseRepository(Generic[ModelType]):
 
         if join_ is not None:
             return await self.all_unique(query)
-            
+
         return await self._all(query)
+
+    async def get_paginated(
+        self, limit: int = 20, offset: int = 0, join_: set[str] | None = None
+    ) -> list[ModelType]:
+        """
+        Returns a paginated list of model instances.
+
+        :param limit: The number of records to return.
+        :param offset: The number of records to skip.
+        :param join_: The joins to make.
+        :return: A list of model instances.
+        """
+        query = self._query(join_)
+        query = query.offset(offset).limit(limit)
+
+        if join_ is not None:
+            return await self._all_unique(query)
+
+        return await self._all(query)
+
+    async def count(self) -> int:
+        """
+        Returns the total count of all records.
+
+        :return: The total count.
+        """
+        query = select(self.model_class)
+        return await self._count(query)
 
     async def get_by(
         self,

@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 
 from app.controllers import AttachmentController, TagController
+from app.schemas.extras.pagination import PaginatedResponse
 from app.schemas.requests.tags import TagCreate
 from app.schemas.responses.attachments import AttachmentResponse
 from app.schemas.responses.tags import TagResponse
@@ -9,11 +10,15 @@ from core.factory import Factory
 tag_router = APIRouter()
 
 
-@tag_router.get("/", response_model=list[TagResponse])
+@tag_router.get("/", response_model=PaginatedResponse[TagResponse])
 async def get_tags(
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
     tag_controller: TagController = Depends(Factory().get_tag_controller),
-) -> list[TagResponse]:
-    return await tag_controller.get_all()
+) -> PaginatedResponse[TagResponse]:
+    items = await tag_controller.get_paginated(limit=limit, offset=offset)
+    total = await tag_controller.count()
+    return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)
 
 
 @tag_router.post("/", response_model=TagResponse, status_code=201)

@@ -1,15 +1,27 @@
 from typing import Callable
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 
 from app.controllers import AttachmentController, CommentController
 from app.models.attachment import AttachmentPermission
+from app.schemas.extras.pagination import PaginatedResponse
 from app.schemas.requests.attachments import AttachmentCreate
 from app.schemas.responses.attachments import AttachmentResponse
 from core.factory import Factory
 from core.fastapi.dependencies.permissions import Permissions
 
 attachment_router = APIRouter()
+
+
+@attachment_router.get("/", response_model=PaginatedResponse[AttachmentResponse])
+async def get_attachments(
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    attachment_controller: AttachmentController = Depends(Factory().get_attachment_controller),
+) -> PaginatedResponse[AttachmentResponse]:
+    items = await attachment_controller.get_paginated(limit=limit, offset=offset)
+    total = await attachment_controller.count()
+    return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)
 
 
 @attachment_router.post("/", response_model=AttachmentResponse, status_code=201)

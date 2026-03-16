@@ -33,3 +33,15 @@ class ActivityLogController(BaseController[ActivityLog]):
     async def get_for_project(self, project_uuid: str) -> list[ActivityLog]:
         project = await self.project_repository.get_by("uuid", project_uuid, unique=True)
         return await self.activity_log_repository.get_by_project_id(project.id)
+
+    async def get_for_project_paginated(
+        self, project_uuid: str, limit: int = 20, offset: int = 0
+    ) -> list[ActivityLog]:
+        project = await self.project_repository.get_by("uuid", project_uuid, unique=True)
+        return await self.activity_log_repository.get_by_project_id_paginated(
+            project.id, limit, offset
+        )
+
+    async def count_for_project(self, project_uuid: str) -> int:
+        project = await self.project_repository.get_by("uuid", project_uuid, unique=True)
+        return await self.activity_log_repository.count_by_project_id(project.id)

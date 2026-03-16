@@ -1,10 +1,9 @@
-from typing import List
-
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 
 from app.controllers.team import TeamController
 from app.controllers.user import UserController
 from app.controllers.user_role import UserRoleController
+from app.schemas.extras.pagination import PaginatedResponse
 from app.schemas.requests.user_roles import UserRoleCreate
 from app.schemas.responses.user_roles import UserRoleResponse
 from core.factory import Factory
@@ -37,13 +36,18 @@ async def assign_role(
 
 @user_role_router.get(
     "/teams/{team_uuid}/roles",
-    response_model=List[UserRoleResponse],
+    response_model=PaginatedResponse[UserRoleResponse],
 )
 async def get_roles(
     team_uuid: str,
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
     user_role_controller: UserRoleController = Depends(Factory().get_user_role_controller),
     team_controller: TeamController = Depends(Factory().get_team_controller),
-) -> List[UserRoleResponse]:
+) -> PaginatedResponse[UserRoleResponse]:
     team = await team_controller.get_by_uuid(team_uuid)
-    roles = await user_role_controller.get_all()
-    return [r for r in roles if r.team_id == team.id]
+    items = await user_role_controller.get_by_team_id_paginated(
+        team.id, limit=limit, offset=offset
+    )
+    total = await user_role_controller.count_by_team_id(team.id)
+    return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)

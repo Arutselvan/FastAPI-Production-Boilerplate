@@ -1,15 +1,27 @@
 from typing import Callable
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 
 from app.controllers import MilestoneController, ProjectController
 from app.models.milestone import MilestonePermission
+from app.schemas.extras.pagination import PaginatedResponse
 from app.schemas.requests.milestones import MilestoneCreate
 from app.schemas.responses.milestones import MilestoneResponse
 from core.factory import Factory
 from core.fastapi.dependencies.permissions import Permissions
 
 milestone_router = APIRouter()
+
+
+@milestone_router.get("/", response_model=PaginatedResponse[MilestoneResponse])
+async def get_milestones(
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
+    milestone_controller: MilestoneController = Depends(Factory().get_milestone_controller),
+) -> PaginatedResponse[MilestoneResponse]:
+    items = await milestone_controller.get_paginated(limit=limit, offset=offset)
+    total = await milestone_controller.count()
+    return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)
 
 
 @milestone_router.post("/", response_model=MilestoneResponse, status_code=201)

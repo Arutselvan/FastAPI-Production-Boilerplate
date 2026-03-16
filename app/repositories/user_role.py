@@ -16,6 +16,19 @@ class UserRoleRepository(BaseRepository[UserRole]):
         )
         return await self._one_or_none(query)
 
+    async def get_by_team_id_paginated(
+        self, team_id: int, limit: int = 20, offset: int = 0
+    ) -> list[UserRole]:
+        query = self._query()
+        query = self._get_by(query, "team_id", team_id)
+        query = query.offset(offset).limit(limit)
+        return await self._all(query)
+
+    async def count_by_team_id(self, team_id: int) -> int:
+        query = self._query()
+        query = self._get_by(query, "team_id", team_id)
+        return await self._count(query)
+
     def _join_user(self, query: Select) -> Select:
         """Join the user relationship."""
         return query.options(joinedload(UserRole.user))

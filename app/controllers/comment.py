@@ -25,6 +25,14 @@ class CommentController(BaseController[Comment]):
         """Returns a list of comments based on author_id."""
         return await self.comment_repository.get_by_author_id(author_id)
 
+    async def get_by_author_id_paginated(
+        self, author_id: int, limit: int = 20, offset: int = 0
+    ) -> list[Comment]:
+        return await self.comment_repository.get_by_author_id_paginated(author_id, limit, offset)
+
+    async def count_by_author_id(self, author_id: int) -> int:
+        return await self.comment_repository.count_by_author_id(author_id)
+
     @Transactional(propagation=Propagation.REQUIRED)
     async def add(self, body: str, author_id: int, project_id: int) -> Comment:
         """Adds a comment."""

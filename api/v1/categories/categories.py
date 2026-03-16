@@ -1,6 +1,7 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 
 from app.controllers import CategoryController
+from app.schemas.extras.pagination import PaginatedResponse
 from app.schemas.requests.categories import CategoryCreate
 from app.schemas.responses.categories import CategoryResponse
 from core.factory import Factory
@@ -8,11 +9,15 @@ from core.factory import Factory
 category_router = APIRouter()
 
 
-@category_router.get("/", response_model=list[CategoryResponse])
+@category_router.get("/", response_model=PaginatedResponse[CategoryResponse])
 async def get_categories(
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
     category_controller: CategoryController = Depends(Factory().get_category_controller),
-) -> list[CategoryResponse]:
-    return await category_controller.get_all()
+) -> PaginatedResponse[CategoryResponse]:
+    items = await category_controller.get_paginated(limit=limit, offset=offset)
+    total = await category_controller.count()
+    return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)
 
 
 @category_router.post("/", response_model=CategoryResponse, status_code=201)

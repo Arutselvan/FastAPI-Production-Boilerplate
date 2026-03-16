@@ -43,6 +43,24 @@ class CommentRepository(BaseRepository[Comment]):
 
         return await self._all(query)
 
+    async def count(self) -> int:
+        """Count non-deleted comments."""
+        query = self._query()
+        return await self._count(query)
+
+    async def get_by_author_id_paginated(
+        self, author_id: int, limit: int = 20, offset: int = 0
+    ) -> list[Comment]:
+        query = self._query()
+        query = self._get_by(query, "author_id", author_id)
+        query = query.offset(offset).limit(limit)
+        return await self._all(query)
+
+    async def count_by_author_id(self, author_id: int) -> int:
+        query = self._query()
+        query = self._get_by(query, "author_id", author_id)
+        return await self._count(query)
+
     async def soft_delete(self, id: int) -> None:
         """Soft delete a comment by setting deleted_at."""
         comments = await self.get_by(field="id", value=id, unique=True)

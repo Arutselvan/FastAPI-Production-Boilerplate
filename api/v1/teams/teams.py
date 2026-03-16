@@ -1,11 +1,12 @@
 from typing import Callable
 
-from fastapi import APIRouter, Depends, Request
+from fastapi import APIRouter, Depends, Query, Request
 
 from app.controllers import MilestoneController, ProjectController, TeamController
 from app.models.milestone import MilestonePermission
 from app.models.project import ProjectPermission
 from app.models.team import TeamPermission
+from app.schemas.extras.pagination import PaginatedResponse
 from app.schemas.requests.teams import TeamCreate
 from app.schemas.responses.milestones import MilestoneResponse
 from app.schemas.responses.projects import ProjectResponse
@@ -16,16 +17,21 @@ from core.fastapi.dependencies.permissions import Permissions
 team_router = APIRouter()
 
 
-@team_router.get("/", response_model=list[TeamResponse])
+@team_router.get("/", response_model=PaginatedResponse[TeamResponse])
 async def get_teams(
     request: Request,
+    limit: int = Query(20, ge=1, le=100),
+    offset: int = Query(0, ge=0),
     team_controller: TeamController = Depends(Factory().get_team_controller),
     assert_access: Callable = Depends(Permissions(TeamPermission.READ)),
-) -> list[TeamResponse]:
-    teams = await team_controller.get_by_owner_id(request.user.id)
+) -> PaginatedResponse[TeamResponse]:
+    items = await team_controller.get_by_owner_id_paginated(
+        request.user.id, limit=limit, offset=offset
+    )
+    total = await team_controller.count_by_owner_id(request.user.id)
 
-    assert_access(teams)
-    return teams
+    assert_access(items)
+    return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)
 
 
 @team_router.post("/", response_model=TeamResponse, status_code=201)

@@ -15,6 +15,14 @@ class UserRoleController(BaseController[UserRole]):
         """Returns the role of a user in a team."""
         return await self.user_role_repository.get_role(user_id, team_id)
 
+    async def get_by_team_id_paginated(
+        self, team_id: int, limit: int = 20, offset: int = 0
+    ) -> list[UserRole]:
+        return await self.user_role_repository.get_by_team_id_paginated(team_id, limit, offset)
+
+    async def count_by_team_id(self, team_id: int) -> int:
+        return await self.user_role_repository.count_by_team_id(team_id)
+
     @Transactional(propagation=Propagation.REQUIRED)
     async def assign_role(
         self,
