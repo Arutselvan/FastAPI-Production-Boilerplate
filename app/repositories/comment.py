@@ -10,6 +10,30 @@ from core.repository import BaseRepository
 class CommentRepository(BaseRepository[Comment]):
     """Comment repository provides all the database operations for the Comment model."""
 
+    async def search_by_name(self, query: str, limit: int = 20, offset: int = 0) -> list[Comment]:
+        """Search comments by body using LIKE %query%."""
+        stmt = self._query()
+        stmt = stmt.where(Comment.body.ilike(f"%{query}%"))
+        stmt = stmt.offset(offset).limit(limit)
+        return await self._all(stmt)
+
+    async def search_by_name_and_author_id(
+        self, query: str, author_id: int, limit: int = 20, offset: int = 0
+    ) -> list[Comment]:
+        """Search comments by body scoped to author."""
+        stmt = self._query()
+        stmt = self._get_by(stmt, "author_id", author_id)
+        stmt = stmt.where(Comment.body.ilike(f"%{query}%"))
+        stmt = stmt.offset(offset).limit(limit)
+        return await self._all(stmt)
+
+    async def count_search_by_name_and_author_id(self, query: str, author_id: int) -> int:
+        """Count comments matching a body search scoped to author."""
+        stmt = self._query()
+        stmt = self._get_by(stmt, "author_id", author_id)
+        stmt = stmt.where(Comment.body.ilike(f"%{query}%"))
+        return await self._count(stmt)
+
     def _query(
         self,
         join_: set[str] | None = None,

@@ -19,13 +19,20 @@ async def get_comments(
     request: Request,
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
+    search: str | None = Query(None),
     comment_controller: CommentController = Depends(Factory().get_comment_controller),
     assert_access: Callable = Depends(Permissions(CommentPermission.READ)),
 ) -> PaginatedResponse[CommentResponse]:
-    items = await comment_controller.get_by_author_id_paginated(
-        request.user.id, limit=limit, offset=offset
-    )
-    total = await comment_controller.count_by_author_id(request.user.id)
+    if search is not None:
+        items = await comment_controller.search_by_name_and_author_id(
+            search, request.user.id, limit=limit, offset=offset
+        )
+        total = await comment_controller.count_search_by_name_and_author_id(search, request.user.id)
+    else:
+        items = await comment_controller.get_by_author_id_paginated(
+            request.user.id, limit=limit, offset=offset
+        )
+        total = await comment_controller.count_by_author_id(request.user.id)
 
     assert_access(items)
     return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)

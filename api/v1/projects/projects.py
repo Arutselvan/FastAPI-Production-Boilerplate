@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Callable
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -21,13 +22,35 @@ async def get_projects(
     request: Request,
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
+    search: str | None = Query(None),
+    created_after: date | None = Query(None),
+    created_before: date | None = Query(None),
     project_controller: ProjectController = Depends(Factory().get_project_controller),
     assert_access: Callable = Depends(Permissions(ProjectPermission.READ)),
 ) -> PaginatedResponse[ProjectResponse]:
-    items = await project_controller.get_by_owner_id_paginated(
-        request.user.id, limit=limit, offset=offset
-    )
-    total = await project_controller.count_by_owner_id(request.user.id)
+    if search is not None:
+        items = await project_controller.search_by_name_and_owner_id(
+            search, request.user.id, limit=limit, offset=offset,
+            created_after=created_after, created_before=created_before,
+        )
+        total = await project_controller.count_search_by_name_and_owner_id(
+            search, request.user.id,
+            created_after=created_after, created_before=created_before,
+        )
+    elif created_after is not None or created_before is not None:
+        items = await project_controller.get_by_owner_id_paginated_filtered(
+            request.user.id, limit=limit, offset=offset,
+            created_after=created_after, created_before=created_before,
+        )
+        total = await project_controller.count_by_owner_id_filtered(
+            request.user.id,
+            created_after=created_after, created_before=created_before,
+        )
+    else:
+        items = await project_controller.get_by_owner_id_paginated(
+            request.user.id, limit=limit, offset=offset
+        )
+        total = await project_controller.count_by_owner_id(request.user.id)
 
     assert_access(items)
     return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)

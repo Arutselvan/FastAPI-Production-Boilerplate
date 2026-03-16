@@ -11,6 +11,14 @@ class TeamController(BaseController[Team]):
         super().__init__(model=Team, repository=team_repository)
         self.team_repository = team_repository
 
+    async def search_by_name_and_owner_id(
+        self, query: str, owner_id: int, limit: int = 20, offset: int = 0
+    ) -> list[Team]:
+        return await self.team_repository.search_by_name_and_owner_id(query, owner_id, limit, offset)
+
+    async def count_search_by_name_and_owner_id(self, query: str, owner_id: int) -> int:
+        return await self.team_repository.count_search_by_name_and_owner_id(query, owner_id)
+
     async def get_by_owner_id(self, owner_id: int) -> list[Team]:
         """
         Returns a list of teams based on owner_id.

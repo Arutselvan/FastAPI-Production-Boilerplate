@@ -11,6 +11,12 @@ class TagController(BaseController[Tag]):
         super().__init__(model=Tag, repository=tag_repository)
         self.tag_repository = tag_repository
 
+    async def search_by_name(self, query: str, limit: int = 20, offset: int = 0) -> list[Tag]:
+        return await self.tag_repository.search_by_name(query, limit, offset)
+
+    async def count_search_by_name(self, query: str) -> int:
+        return await self.tag_repository.count_search_by_name(query)
+
     async def get_by_name(self, name: str) -> Tag | None:
         """
         Returns the tag matching the name.

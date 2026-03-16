@@ -14,10 +14,15 @@ tag_router = APIRouter()
 async def get_tags(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
+    search: str | None = Query(None),
     tag_controller: TagController = Depends(Factory().get_tag_controller),
 ) -> PaginatedResponse[TagResponse]:
-    items = await tag_controller.get_paginated(limit=limit, offset=offset)
-    total = await tag_controller.count()
+    if search is not None:
+        items = await tag_controller.search_by_name(search, limit=limit, offset=offset)
+        total = await tag_controller.count_search_by_name(search)
+    else:
+        items = await tag_controller.get_paginated(limit=limit, offset=offset)
+        total = await tag_controller.count()
     return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)
 
 

@@ -22,13 +22,20 @@ async def get_teams(
     request: Request,
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
+    search: str | None = Query(None),
     team_controller: TeamController = Depends(Factory().get_team_controller),
     assert_access: Callable = Depends(Permissions(TeamPermission.READ)),
 ) -> PaginatedResponse[TeamResponse]:
-    items = await team_controller.get_by_owner_id_paginated(
-        request.user.id, limit=limit, offset=offset
-    )
-    total = await team_controller.count_by_owner_id(request.user.id)
+    if search is not None:
+        items = await team_controller.search_by_name_and_owner_id(
+            search, request.user.id, limit=limit, offset=offset
+        )
+        total = await team_controller.count_search_by_name_and_owner_id(search, request.user.id)
+    else:
+        items = await team_controller.get_by_owner_id_paginated(
+            request.user.id, limit=limit, offset=offset
+        )
+        total = await team_controller.count_by_owner_id(request.user.id)
 
     assert_access(items)
     return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)

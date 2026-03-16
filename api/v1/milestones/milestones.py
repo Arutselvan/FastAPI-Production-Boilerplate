@@ -1,3 +1,4 @@
+from datetime import date
 from typing import Callable
 
 from fastapi import APIRouter, Depends, Query, Request
@@ -17,10 +18,30 @@ milestone_router = APIRouter()
 async def get_milestones(
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
+    search: str | None = Query(None),
+    created_after: date | None = Query(None),
+    created_before: date | None = Query(None),
     milestone_controller: MilestoneController = Depends(Factory().get_milestone_controller),
 ) -> PaginatedResponse[MilestoneResponse]:
-    items = await milestone_controller.get_paginated(limit=limit, offset=offset)
-    total = await milestone_controller.count()
+    if search is not None:
+        items = await milestone_controller.search_by_name(
+            search, limit=limit, offset=offset,
+            created_after=created_after, created_before=created_before,
+        )
+        total = await milestone_controller.count_search_by_name(
+            search, created_after=created_after, created_before=created_before,
+        )
+    elif created_after is not None or created_before is not None:
+        items = await milestone_controller.get_paginated_filtered(
+            limit=limit, offset=offset,
+            created_after=created_after, created_before=created_before,
+        )
+        total = await milestone_controller.count_filtered(
+            created_after=created_after, created_before=created_before,
+        )
+    else:
+        items = await milestone_controller.get_paginated(limit=limit, offset=offset)
+        total = await milestone_controller.count()
     return PaginatedResponse(items=items, total=total, limit=limit, offset=offset)
 
 

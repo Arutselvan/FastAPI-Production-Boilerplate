@@ -10,6 +10,30 @@ class TeamRepository(BaseRepository[Team]):
     Team repository provides all the database operations for the Team model.
     """
 
+    async def search_by_name(self, query: str, limit: int = 20, offset: int = 0) -> list[Team]:
+        """Search teams by name using LIKE %query%."""
+        stmt = self._query()
+        stmt = stmt.where(Team.name.ilike(f"%{query}%"))
+        stmt = stmt.offset(offset).limit(limit)
+        return await self._all(stmt)
+
+    async def search_by_name_and_owner_id(
+        self, query: str, owner_id: int, limit: int = 20, offset: int = 0
+    ) -> list[Team]:
+        """Search teams by name scoped to owner."""
+        stmt = self._query()
+        stmt = self._get_by(stmt, "owner_id", owner_id)
+        stmt = stmt.where(Team.name.ilike(f"%{query}%"))
+        stmt = stmt.offset(offset).limit(limit)
+        return await self._all(stmt)
+
+    async def count_search_by_name_and_owner_id(self, query: str, owner_id: int) -> int:
+        """Count teams matching a name search scoped to owner."""
+        stmt = self._query()
+        stmt = self._get_by(stmt, "owner_id", owner_id)
+        stmt = stmt.where(Team.name.ilike(f"%{query}%"))
+        return await self._count(stmt)
+
     async def get_by_owner_id(
         self, owner_id: int, join_: set[str] | None = None
     ) -> list[Team]:

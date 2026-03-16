@@ -1,3 +1,5 @@
+from datetime import date
+
 from app.models import Project, Tag
 from app.repositories import MilestoneRepository, ProjectRepository, TagRepository, TeamRepository
 from app.repositories.activity_log import ActivityLogRepository
@@ -30,6 +32,52 @@ class ProjectController(BaseController[Project]):
         self.team_repository = team_repository
         self.tag_repository = tag_repository
         self.activity_log_repository = activity_log_repository
+
+    async def search_by_name_and_owner_id(
+        self,
+        query: str,
+        owner_id: int,
+        limit: int = 20,
+        offset: int = 0,
+        created_after: date | None = None,
+        created_before: date | None = None,
+    ) -> list[Project]:
+        return await self.project_repository.search_by_name_and_owner_id(
+            query, owner_id, limit, offset, created_after, created_before
+        )
+
+    async def count_search_by_name_and_owner_id(
+        self,
+        query: str,
+        owner_id: int,
+        created_after: date | None = None,
+        created_before: date | None = None,
+    ) -> int:
+        return await self.project_repository.count_search_by_name_and_owner_id(
+            query, owner_id, created_after, created_before
+        )
+
+    async def get_by_owner_id_paginated_filtered(
+        self,
+        owner_id: int,
+        limit: int = 20,
+        offset: int = 0,
+        created_after: date | None = None,
+        created_before: date | None = None,
+    ) -> list[Project]:
+        return await self.project_repository.get_by_owner_id_paginated_filtered(
+            owner_id, limit, offset, created_after, created_before
+        )
+
+    async def count_by_owner_id_filtered(
+        self,
+        owner_id: int,
+        created_after: date | None = None,
+        created_before: date | None = None,
+    ) -> int:
+        return await self.project_repository.count_by_owner_id_filtered(
+            owner_id, created_after, created_before
+        )
 
     async def get_by_team_id(self, team_id: int) -> list[Project]:
         """

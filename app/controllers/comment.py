@@ -17,6 +17,14 @@ class CommentController(BaseController[Comment]):
         self.comment_repository = comment_repository
         self.project_repository = project_repository
 
+    async def search_by_name_and_author_id(
+        self, query: str, author_id: int, limit: int = 20, offset: int = 0
+    ) -> list[Comment]:
+        return await self.comment_repository.search_by_name_and_author_id(query, author_id, limit, offset)
+
+    async def count_search_by_name_and_author_id(self, query: str, author_id: int) -> int:
+        return await self.comment_repository.count_search_by_name_and_author_id(query, author_id)
+
     async def get_by_project_id(self, project_id: int) -> list[Comment]:
         """Returns a list of comments based on project_id."""
         return await self.comment_repository.get_by_project_id(project_id)

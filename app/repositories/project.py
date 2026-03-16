@@ -1,3 +1,5 @@
+from datetime import date
+
 from sqlalchemy import Select, delete, insert, select, update
 from sqlalchemy.orm import joinedload
 
@@ -10,6 +12,83 @@ class ProjectRepository(BaseRepository[Project]):
     """
     Project repository provides all the database operations for the Project model.
     """
+
+    async def search_by_name(self, query: str, limit: int = 20, offset: int = 0) -> list[Project]:
+        """Search projects by name using LIKE %query%."""
+        stmt = self._query()
+        stmt = stmt.where(Project.name.ilike(f"%{query}%"))
+        stmt = stmt.offset(offset).limit(limit)
+        return await self._all(stmt)
+
+    async def search_by_name_and_owner_id(
+        self,
+        query: str,
+        owner_id: int,
+        limit: int = 20,
+        offset: int = 0,
+        created_after: date | None = None,
+        created_before: date | None = None,
+    ) -> list[Project]:
+        """Search projects by name scoped to owner with optional date filters."""
+        stmt = self._query()
+        stmt = self._get_by(stmt, "owner_id", owner_id)
+        stmt = stmt.where(Project.name.ilike(f"%{query}%"))
+        if created_after is not None:
+            stmt = stmt.where(Project.created_at >= created_after)
+        if created_before is not None:
+            stmt = stmt.where(Project.created_at <= created_before)
+        stmt = stmt.offset(offset).limit(limit)
+        return await self._all(stmt)
+
+    async def count_search_by_name_and_owner_id(
+        self,
+        query: str,
+        owner_id: int,
+        created_after: date | None = None,
+        created_before: date | None = None,
+    ) -> int:
+        """Count projects matching a name search scoped to owner with optional date filters."""
+        stmt = self._query()
+        stmt = self._get_by(stmt, "owner_id", owner_id)
+        stmt = stmt.where(Project.name.ilike(f"%{query}%"))
+        if created_after is not None:
+            stmt = stmt.where(Project.created_at >= created_after)
+        if created_before is not None:
+            stmt = stmt.where(Project.created_at <= created_before)
+        return await self._count(stmt)
+
+    async def get_by_owner_id_paginated_filtered(
+        self,
+        owner_id: int,
+        limit: int = 20,
+        offset: int = 0,
+        created_after: date | None = None,
+        created_before: date | None = None,
+    ) -> list[Project]:
+        """Get paginated projects by owner with optional date filters."""
+        stmt = self._query()
+        stmt = self._get_by(stmt, "owner_id", owner_id)
+        if created_after is not None:
+            stmt = stmt.where(Project.created_at >= created_after)
+        if created_before is not None:
+            stmt = stmt.where(Project.created_at <= created_before)
+        stmt = stmt.offset(offset).limit(limit)
+        return await self._all(stmt)
+
+    async def count_by_owner_id_filtered(
+        self,
+        owner_id: int,
+        created_after: date | None = None,
+        created_before: date | None = None,
+    ) -> int:
+        """Count projects by owner with optional date filters."""
+        stmt = self._query()
+        stmt = self._get_by(stmt, "owner_id", owner_id)
+        if created_after is not None:
+            stmt = stmt.where(Project.created_at >= created_after)
+        if created_before is not None:
+            stmt = stmt.where(Project.created_at <= created_before)
+        return await self._count(stmt)
 
     async def get_by_owner_id(
         self, owner_id: int, join_: set[str] | None = None

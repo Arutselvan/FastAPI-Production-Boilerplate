@@ -11,6 +11,12 @@ class CategoryController(BaseController[Category]):
         super().__init__(model=Category, repository=category_repository)
         self.category_repository = category_repository
 
+    async def search_by_name(self, query: str, limit: int = 20, offset: int = 0) -> list[Category]:
+        return await self.category_repository.search_by_name(query, limit, offset)
+
+    async def count_search_by_name(self, query: str) -> int:
+        return await self.category_repository.count_search_by_name(query)
+
     async def get_by_name(self, name: str) -> Category | None:
         """
         Returns the category matching the name.
