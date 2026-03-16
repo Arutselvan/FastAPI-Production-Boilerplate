@@ -15,42 +15,43 @@ from core.security.access_control import (
 )
 
 
-class ProjectPermission(Enum):
+class CommentPermission(Enum):
     CREATE = "create"
     READ = "read"
     EDIT = "edit"
     DELETE = "delete"
 
 
-class Project(Base, TimestampMixin):
-    __tablename__ = "projects"
+class Comment(Base, TimestampMixin):
+    __tablename__ = "comments"
 
     id = Column(BigInteger, primary_key=True, autoincrement=True)
     uuid = Column(UUID(as_uuid=True), default=uuid4, unique=True, nullable=False)
-    name = Column(Unicode(255), nullable=False)
-    description = Column(Unicode(1000), nullable=True)
+    body = Column(Unicode(2000), nullable=False)
 
-    owner_id = Column(
+    author_id = Column(
         BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
-    owner = relationship("User", back_populates="projects", uselist=False, lazy="raise")
-    comments = relationship(
-        "Comment", back_populates="project", lazy="raise", passive_deletes=True
+    author = relationship("User", back_populates="comments", uselist=False, lazy="raise")
+
+    project_id = Column(
+        BigInteger, ForeignKey("projects.id", ondelete="CASCADE"), nullable=False
     )
+    project = relationship("Project", back_populates="comments", uselist=False, lazy="raise")
 
     __mapper_args__ = {"eager_defaults": True}
 
     def __acl__(self):
-        basic_permissions = [ProjectPermission.CREATE]
+        basic_permissions = [CommentPermission.CREATE]
         self_permissions = [
-            ProjectPermission.READ,
-            ProjectPermission.EDIT,
-            ProjectPermission.DELETE,
+            CommentPermission.READ,
+            CommentPermission.EDIT,
+            CommentPermission.DELETE,
         ]
-        all_permissions = list(ProjectPermission)
+        all_permissions = list(CommentPermission)
 
         return [
             (Allow, Authenticated, basic_permissions),
-            (Allow, UserPrincipal(self.owner_id), self_permissions),
+            (Allow, UserPrincipal(self.author_id), self_permissions),
             (Allow, RolePrincipal("admin"), all_permissions),
         ]

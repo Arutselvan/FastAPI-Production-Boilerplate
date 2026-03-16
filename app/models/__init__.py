@@ -1,5 +1,6 @@
 from core.database import Base
 
+from .comment import Comment
 from .category import Category
 from .project import Project
 from .tag import Tag

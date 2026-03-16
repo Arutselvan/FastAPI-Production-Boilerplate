@@ -2,9 +2,9 @@ from functools import partial
 
 from fastapi import Depends
 
-from app.controllers import AuthController, CategoryController, ProjectController, TagController, TaskController, TeamController, UserController
-from app.models import Category, Project, Tag, Task, Team, User
-from app.repositories import CategoryRepository, ProjectRepository, TagRepository, TaskRepository, TeamRepository, UserRepository
+from app.controllers import AuthController, CategoryController, CommentController, ProjectController, TagController, TaskController, TeamController, UserController
+from app.models import Category, Comment, Project, Tag, Task, Team, User
+from app.repositories import CategoryRepository, CommentRepository, ProjectRepository, TagRepository, TaskRepository, TeamRepository, UserRepository
 from core.database import get_session
 
 
@@ -15,6 +15,7 @@ class Factory:
     """
 
     # Repositories
+    comment_repository = partial(CommentRepository, Comment)
     category_repository = partial(CategoryRepository, Category)
     project_repository = partial(ProjectRepository, Project)
     tag_repository = partial(TagRepository, Tag)
@@ -50,6 +51,11 @@ class Factory:
     def get_tag_controller(self, db_session=Depends(get_session)):
         return TagController(
             tag_repository=self.tag_repository(db_session=db_session)
+        )
+
+    def get_comment_controller(self, db_session=Depends(get_session)):
+        return CommentController(
+            comment_repository=self.comment_repository(db_session=db_session)
         )
 
     def get_auth_controller(self, db_session=Depends(get_session)):

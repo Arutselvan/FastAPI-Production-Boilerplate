@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from .comments import comments_router
 from .categories import categories_router
 from .monitoring import monitoring_router
 from .projects import projects_router
@@ -9,6 +10,7 @@ from .teams import teams_router
 from .users import users_router
 
 v1_router = APIRouter()
+v1_router.include_router(comments_router, prefix="/comments")
 v1_router.include_router(categories_router, prefix="/categories")
 v1_router.include_router(monitoring_router, prefix="/monitoring")
 v1_router.include_router(projects_router, prefix="/projects")
