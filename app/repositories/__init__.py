@@ -1,3 +1,4 @@
+from .attachment import AttachmentRepository
 from .comment import CommentRepository
 from .category import CategoryRepository
 from .milestone import MilestoneRepository
@@ -8,6 +9,7 @@ from .team import TeamRepository
 from .user import UserRepository
 
 __all__ = [
+    "AttachmentRepository",
     "CommentRepository",
     "CategoryRepository",
     "MilestoneRepository",

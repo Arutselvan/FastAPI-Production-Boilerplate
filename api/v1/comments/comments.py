@@ -2,9 +2,10 @@ from typing import Callable
 
 from fastapi import APIRouter, Depends, Request
 
-from app.controllers import CommentController, ProjectController
+from app.controllers import AttachmentController, CommentController, ProjectController
 from app.models.comment import CommentPermission
 from app.schemas.requests.comments import CommentCreate
+from app.schemas.responses.attachments import AttachmentResponse
 from app.schemas.responses.comments import CommentResponse
 from core.factory import Factory
 from core.fastapi.dependencies.permissions import Permissions
@@ -50,6 +51,20 @@ async def get_comment(
 
     assert_access(comment)
     return comment
+
+
+@comment_router.get("/{comment_uuid}/attachments", response_model=list[AttachmentResponse])
+async def get_comment_attachments(
+    comment_uuid: str,
+    comment_controller: CommentController = Depends(Factory().get_comment_controller),
+    attachment_controller: AttachmentController = Depends(Factory().get_attachment_controller),
+    assert_access: Callable = Depends(Permissions(CommentPermission.READ)),
+) -> list[AttachmentResponse]:
+    comment = await comment_controller.get_by_uuid(comment_uuid)
+
+    assert_access(comment)
+    attachments = await attachment_controller.get_by_comment_id(comment.id)
+    return attachments
 
 
 @comment_router.delete("/{comment_uuid}", status_code=204)

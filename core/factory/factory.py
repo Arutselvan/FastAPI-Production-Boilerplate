@@ -2,9 +2,9 @@ from functools import partial
 
 from fastapi import Depends
 
-from app.controllers import AuthController, CategoryController, CommentController, MilestoneController, ProjectController, TagController, TaskController, TeamController, UserController
-from app.models import Category, Comment, Milestone, Project, Tag, Task, Team, User
-from app.repositories import CategoryRepository, CommentRepository, MilestoneRepository, ProjectRepository, TagRepository, TaskRepository, TeamRepository, UserRepository
+from app.controllers import AttachmentController, AuthController, CategoryController, CommentController, MilestoneController, ProjectController, TagController, TaskController, TeamController, UserController
+from app.models import Attachment, Category, Comment, Milestone, Project, Tag, Task, Team, User
+from app.repositories import AttachmentRepository, CategoryRepository, CommentRepository, MilestoneRepository, ProjectRepository, TagRepository, TaskRepository, TeamRepository, UserRepository
 from core.database import get_session
 
 
@@ -15,6 +15,7 @@ class Factory:
     """
 
     # Repositories
+    attachment_repository = partial(AttachmentRepository, Attachment)
     comment_repository = partial(CommentRepository, Comment)
     category_repository = partial(CategoryRepository, Category)
     milestone_repository = partial(MilestoneRepository, Milestone)
@@ -23,6 +24,11 @@ class Factory:
     task_repository = partial(TaskRepository, Task)
     team_repository = partial(TeamRepository, Team)
     user_repository = partial(UserRepository, User)
+
+    def get_attachment_controller(self, db_session=Depends(get_session)):
+        return AttachmentController(
+            attachment_repository=self.attachment_repository(db_session=db_session)
+        )
 
     def get_user_controller(self, db_session=Depends(get_session)):
         return UserController(

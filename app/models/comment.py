@@ -39,6 +39,8 @@ class Comment(Base, TimestampMixin):
     )
     project = relationship("Project", back_populates="comments", uselist=False, lazy="raise")
 
+    attachments = relationship("Attachment", back_populates="comment", lazy="raise")
+
     __mapper_args__ = {"eager_defaults": True}
 
     def __acl__(self):

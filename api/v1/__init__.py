@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from .attachments import attachments_router
 from .comments import comments_router
 from .categories import categories_router
 from .milestones import milestones_router
@@ -11,6 +12,7 @@ from .teams import teams_router
 from .users import users_router
 
 v1_router = APIRouter()
+v1_router.include_router(attachments_router, prefix="/attachments")
 v1_router.include_router(comments_router, prefix="/comments")
 v1_router.include_router(categories_router, prefix="/categories")
 v1_router.include_router(milestones_router, prefix="/milestones")
