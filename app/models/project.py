@@ -49,6 +49,9 @@ class Project(Base, TimestampMixin):
         "Comment", back_populates="project", lazy="raise", passive_deletes=True
     )
     tags = relationship("Tag", secondary=project_tags, lazy="raise")
+    milestones = relationship(
+        "Milestone", back_populates="project", lazy="raise", passive_deletes=True
+    )
 
     __mapper_args__ = {"eager_defaults": True}
 

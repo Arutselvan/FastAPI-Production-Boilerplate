@@ -2,10 +2,11 @@ from typing import Callable
 
 from fastapi import APIRouter, Depends, Request
 
-from app.controllers import CommentController, ProjectController
+from app.controllers import CommentController, MilestoneController, ProjectController
 from app.models.project import ProjectPermission
 from app.schemas.requests.projects import ProjectCreate
 from app.schemas.responses.comments import CommentResponse
+from app.schemas.responses.milestones import MilestoneResponse
 from app.schemas.responses.projects import ProjectResponse
 from app.schemas.responses.tags import TagResponse
 from core.factory import Factory
@@ -76,6 +77,20 @@ async def get_project_comments(
     assert_access(project)
     comments = await comment_controller.get_by_project_id(project.id)
     return comments
+
+
+@project_router.get("/{project_uuid}/milestones", response_model=list[MilestoneResponse])
+async def get_project_milestones(
+    project_uuid: str,
+    project_controller: ProjectController = Depends(Factory().get_project_controller),
+    milestone_controller: MilestoneController = Depends(Factory().get_milestone_controller),
+    assert_access: Callable = Depends(Permissions(ProjectPermission.READ)),
+) -> list[MilestoneResponse]:
+    project = await project_controller.get_by_uuid(project_uuid)
+
+    assert_access(project)
+    milestones = await milestone_controller.get_by_project_id(project.id)
+    return milestones
 
 
 @project_router.post("/{project_uuid}/tags/{tag_uuid}", status_code=201)
