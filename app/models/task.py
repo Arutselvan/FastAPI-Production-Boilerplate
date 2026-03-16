@@ -1,7 +1,7 @@
 from enum import Enum
 from uuid import uuid4
 
-from sqlalchemy import BigInteger, Boolean, Column, ForeignKey, String
+from sqlalchemy import BigInteger, Boolean, Column, Float, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -31,10 +31,16 @@ class Task(Base, TimestampMixin):
     description = Column(String(255), nullable=False)
     is_completed = Column(Boolean, default=False, nullable=False)
 
+    priority_score = Column(Float, nullable=True, default=None)
+
     task_author_id = Column(
         BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False
     )
+    project_id = Column(
+        BigInteger, ForeignKey("projects.id", ondelete="SET NULL"), nullable=True
+    )
     author = relationship("User", back_populates="tasks", uselist=False, lazy="raise")
+    project = relationship("Project", uselist=False, lazy="raise")
 
     __mapper_args__ = {"eager_defaults": True}
 

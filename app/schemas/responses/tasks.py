@@ -10,6 +10,9 @@ class TaskResponse(BaseModel):
     uuid: UUID4 = Field(
         ..., description="Task UUID", example="a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11"
     )
+    priority_score: float | None = Field(
+        None, description="Priority score based on nearest milestone deadline"
+    )
 
     class Config:
         orm_mode = True

@@ -2,7 +2,7 @@ from typing import Callable
 
 from fastapi import APIRouter, Depends, Request
 
-from app.controllers import CommentController, MilestoneController, ProjectController
+from app.controllers import CommentController, MilestoneController, ProjectController, TaskController
 from app.models.project import ProjectPermission
 from app.schemas.requests.projects import ProjectCreate, ProjectStatusUpdate
 from app.schemas.responses.comments import CommentResponse
@@ -127,6 +127,18 @@ async def remove_tag_from_project(
     project = await project_controller.get_by_uuid(project_uuid)
     assert_access(project)
     await project_controller.remove_tag(project_uuid, tag_uuid)
+
+
+@project_router.post("/{project_uuid}/recalculate-priority", status_code=200)
+async def recalculate_priority(
+    project_uuid: str,
+    project_controller: ProjectController = Depends(Factory().get_project_controller),
+    task_controller: TaskController = Depends(Factory().get_task_controller),
+    assert_access: Callable = Depends(Permissions(ProjectPermission.EDIT)),
+) -> None:
+    project = await project_controller.get_by_uuid(project_uuid)
+    assert_access(project)
+    await task_controller.recalculate_priority(project_uuid)
 
 
 @project_router.get("/{project_uuid}/tags", response_model=list[TagResponse])

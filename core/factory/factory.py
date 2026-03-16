@@ -48,7 +48,8 @@ class Factory:
 
     def get_task_controller(self, db_session=Depends(get_session)):
         return TaskController(
-            task_repository=self.task_repository(db_session=db_session)
+            task_repository=self.task_repository(db_session=db_session),
+            project_repository=self.project_repository(db_session=db_session),
         )
 
     def get_category_controller(self, db_session=Depends(get_session)):
