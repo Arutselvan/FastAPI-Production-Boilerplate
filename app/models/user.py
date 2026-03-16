@@ -33,6 +33,9 @@ class User(Base, TimestampMixin):
     projects = relationship(
         "Project", back_populates="owner", lazy="raise", passive_deletes=True
     )
+    teams = relationship(
+        "Team", back_populates="owner", lazy="raise", passive_deletes=True
+    )
 
     __mapper_args__ = {"eager_defaults": True}
 
