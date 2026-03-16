@@ -1,4 +1,4 @@
-from sqlalchemy import Select, delete, insert, select
+from sqlalchemy import Select, delete, insert, select, update
 from sqlalchemy.orm import joinedload
 
 from app.models import Project, Tag
@@ -86,6 +86,17 @@ class ProjectRepository(BaseRepository[Project]):
         )
         result = await self.session.scalars(query)
         return result.all()
+
+    async def update_status(self, project_id: int, new_status: str) -> Project:
+        """Update the status of a project."""
+        stmt = (
+            update(Project)
+            .where(Project.id == project_id)
+            .values(status=new_status)
+            .returning(Project)
+        )
+        result = await self.session.scalars(stmt)
+        return result.one()
 
     def _join_owner(self, query: Select) -> Select:
         """

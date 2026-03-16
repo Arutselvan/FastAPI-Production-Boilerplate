@@ -6,3 +6,7 @@ from pydantic import BaseModel, constr
 class ProjectCreate(BaseModel):
     name: constr(min_length=1, max_length=255)
     description: Optional[constr(max_length=1000)] = None
+
+
+class ProjectStatusUpdate(BaseModel):
+    status: str

@@ -2,7 +2,8 @@ from app.models import Project, Tag
 from app.repositories import ProjectRepository
 from core.controller import BaseController
 from core.database.transactional import Propagation, Transactional
-from core.exceptions import NotFoundException
+from app.models.project import ProjectStatus
+from core.exceptions import BadRequestException, NotFoundException
 
 
 class ProjectController(BaseController[Project]):
@@ -73,3 +74,26 @@ class ProjectController(BaseController[Project]):
         """Get all tags for a project."""
         project = await self.get_by_uuid(project_uuid)
         return await self.project_repository.get_tags(project.id)
+
+    _ALLOWED_TRANSITIONS = {
+        ProjectStatus.DRAFT: {ProjectStatus.ACTIVE},
+        ProjectStatus.ACTIVE: {ProjectStatus.ARCHIVED},
+        ProjectStatus.ARCHIVED: set(),
+    }
+
+    @Transactional(propagation=Propagation.REQUIRED)
+    async def transition_status(self, project_uuid: str, new_status: str) -> Project:
+        """Transition a project's status with validation."""
+        project = await self.get_by_uuid(project_uuid)
+        current = ProjectStatus(project.status)
+        try:
+            target = ProjectStatus(new_status)
+        except ValueError:
+            raise BadRequestException(f"Invalid status: {new_status}")
+
+        if target not in self._ALLOWED_TRANSITIONS.get(current, set()):
+            raise BadRequestException(
+                f"Transition from {current.value} to {target.value} is not allowed"
+            )
+
+        return await self.project_repository.update_status(project.id, target.value)

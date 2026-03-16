@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Request
 
 from app.controllers import CommentController, MilestoneController, ProjectController
 from app.models.project import ProjectPermission
-from app.schemas.requests.projects import ProjectCreate
+from app.schemas.requests.projects import ProjectCreate, ProjectStatusUpdate
 from app.schemas.responses.comments import CommentResponse
 from app.schemas.responses.milestones import MilestoneResponse
 from app.schemas.responses.projects import ProjectResponse
@@ -63,6 +63,18 @@ async def delete_project(
 
     assert_access(project)
     await project_controller.delete(project)
+
+
+@project_router.patch("/{project_uuid}/status", response_model=ProjectResponse)
+async def update_project_status(
+    project_uuid: str,
+    body: ProjectStatusUpdate,
+    project_controller: ProjectController = Depends(Factory().get_project_controller),
+    assert_access: Callable = Depends(Permissions(ProjectPermission.EDIT)),
+) -> ProjectResponse:
+    project = await project_controller.get_by_uuid(project_uuid)
+    assert_access(project)
+    return await project_controller.transition_status(project_uuid, body.status)
 
 
 @project_router.get("/{project_uuid}/comments", response_model=list[CommentResponse])

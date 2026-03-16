@@ -1,7 +1,7 @@
 from enum import Enum
 from uuid import uuid4
 
-from sqlalchemy import BigInteger, Column, ForeignKey, Table, Unicode
+from sqlalchemy import BigInteger, Column, Enum as SAEnum, ForeignKey, Table, Unicode
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import relationship
 
@@ -22,6 +22,12 @@ project_tags = Table(
 )
 
 
+class ProjectStatus(Enum):
+    DRAFT = "draft"
+    ACTIVE = "active"
+    ARCHIVED = "archived"
+
+
 class ProjectPermission(Enum):
     CREATE = "create"
     READ = "read"
@@ -36,6 +42,12 @@ class Project(Base, TimestampMixin):
     uuid = Column(UUID(as_uuid=True), default=uuid4, unique=True, nullable=False)
     name = Column(Unicode(255), nullable=False)
     description = Column(Unicode(1000), nullable=True)
+    status = Column(
+        SAEnum("draft", "active", "archived", name="project_status"),
+        default="draft",
+        server_default="draft",
+        nullable=False,
+    )
 
     owner_id = Column(
         BigInteger, ForeignKey("users.id", ondelete="CASCADE"), nullable=False

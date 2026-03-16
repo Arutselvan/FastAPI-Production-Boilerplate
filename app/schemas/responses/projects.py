@@ -13,6 +13,7 @@ class ProjectResponse(BaseModel):
         None, description="Project description", example="A sample project"
     )
     owner_id: int = Field(..., description="Owner ID")
+    status: str = Field(..., description="Project status")
     created_at: datetime = Field(..., description="Creation timestamp")
 
     class Config:
