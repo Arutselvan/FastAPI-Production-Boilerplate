@@ -50,6 +50,7 @@ class Factory:
             project_repository=self.project_repository(db_session=db_session),
             milestone_repository=self.milestone_repository(db_session=db_session),
             team_repository=self.team_repository(db_session=db_session),
+            tag_repository=self.tag_repository(db_session=db_session),
         )
 
     def get_task_controller(self, db_session=Depends(get_session)):
