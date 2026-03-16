@@ -74,7 +74,7 @@ async def update_project_status(
 ) -> ProjectResponse:
     project = await project_controller.get_by_uuid(project_uuid)
     assert_access(project)
-    return await project_controller.transition_status(project_uuid, body.status)
+    return await project_controller.transition_status(project_uuid, body.status, actor_id=request.user.id)
 
 
 @project_router.get("/{project_uuid}/comments", response_model=list[CommentResponse])
@@ -107,6 +107,7 @@ async def get_project_milestones(
 
 @project_router.post("/{project_uuid}/tags/{tag_uuid}", status_code=201)
 async def assign_tag_to_project(
+    request: Request,
     project_uuid: str,
     tag_uuid: str,
     project_controller: ProjectController = Depends(Factory().get_project_controller),
@@ -114,7 +115,7 @@ async def assign_tag_to_project(
 ) -> None:
     project = await project_controller.get_by_uuid(project_uuid)
     assert_access(project)
-    await project_controller.assign_tag(project_uuid, tag_uuid)
+    await project_controller.assign_tag(project_uuid, tag_uuid, actor_id=request.user.id)
 
 
 @project_router.delete("/{project_uuid}/tags/{tag_uuid}", status_code=204)

@@ -1,5 +1,6 @@
 from core.database import Base
 
+from .activity_log import ActivityLog
 from .approval import Approval
 from .attachment import Attachment
 from .comment import Comment

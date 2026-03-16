@@ -1,3 +1,4 @@
+from .activity_log import ActivityLogController
 from .approval import ApprovalController
 from .attachment import AttachmentController
 from .auth import AuthController
@@ -12,6 +13,7 @@ from .user import UserController
 from .user_role import UserRoleController
 
 __all__ = [
+    "ActivityLogController",
     "ApprovalController",
     "AttachmentController",
     "AuthController",

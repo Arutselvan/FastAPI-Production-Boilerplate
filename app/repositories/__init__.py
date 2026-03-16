@@ -1,3 +1,4 @@
+from .activity_log import ActivityLogRepository
 from .approval import ApprovalRepository
 from .attachment import AttachmentRepository
 from .comment import CommentRepository
@@ -11,6 +12,7 @@ from .user import UserRepository
 from .user_role import UserRoleRepository
 
 __all__ = [
+    "ActivityLogRepository",
     "ApprovalRepository",
     "AttachmentRepository",
     "CommentRepository",

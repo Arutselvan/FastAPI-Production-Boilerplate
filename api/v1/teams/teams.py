@@ -84,10 +84,11 @@ async def get_team_milestones(
 
 @team_router.post("/{team_uuid}/archive-projects")
 async def archive_team_projects(
+    request: Request,
     team_uuid: str,
     project_controller: ProjectController = Depends(Factory().get_project_controller),
 ) -> dict:
-    return await project_controller.bulk_archive_team_projects(team_uuid)
+    return await project_controller.bulk_archive_team_projects(team_uuid, actor_id=request.user.id)
 
 
 @team_router.delete("/{team_uuid}", status_code=204)

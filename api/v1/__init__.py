@@ -1,5 +1,6 @@
 from fastapi import APIRouter
 
+from .activity_logs import activity_logs_router
 from .approvals import approvals_router
 from .attachments import attachments_router
 from .comments import comments_router
@@ -14,6 +15,7 @@ from .users import users_router
 from .user_roles import user_roles_router
 
 v1_router = APIRouter()
+v1_router.include_router(activity_logs_router)
 v1_router.include_router(approvals_router)
 v1_router.include_router(attachments_router, prefix="/attachments")
 v1_router.include_router(comments_router, prefix="/comments")
